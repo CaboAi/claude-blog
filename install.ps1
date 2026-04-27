@@ -21,12 +21,12 @@ function Main {
 
 "@
 
-    $SkillDir = Join-Path $env:USERPROFILE ".claude" "skills"
-    $AgentDir = Join-Path $env:USERPROFILE ".claude" "agents"
+    $SkillDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "skills"
+    $AgentDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "agents"
     $TempDir = $null
 
     # Determine source directory (local clone or piped from irm)
-    if ($MyInvocation.MyCommand.Path -and (Test-Path (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "skills" "blog"))) {
+    if ($MyInvocation.MyCommand.Path -and (Test-Path (Join-Path (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "skills") "blog"))) {
         $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     } else {
         Write-Color White "Cloning claude-blog..."
@@ -48,23 +48,23 @@ function Main {
 
     # Create directories
     Write-Color White "Creating directories..."
-    New-Item -ItemType Directory -Force -Path (Join-Path $SkillDir "blog" "references") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $SkillDir "blog" "templates") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $SkillDir "blog" "scripts") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path (Join-Path $SkillDir "blog") "references") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path (Join-Path $SkillDir "blog") "templates") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path (Join-Path $SkillDir "blog") "scripts") | Out-Null
     New-Item -ItemType Directory -Force -Path $AgentDir | Out-Null
 
     # Copy main skill
     Write-Color White "Installing main skill: blog..."
-    Copy-Item (Join-Path $ScriptDir "skills" "blog" "SKILL.md") (Join-Path $SkillDir "blog" "SKILL.md") -Force
+    Copy-Item (Join-Path (Join-Path (Join-Path $ScriptDir "skills") "blog") "SKILL.md") (Join-Path (Join-Path $SkillDir "blog") "SKILL.md") -Force
 
     # Copy references
     Write-Color White "Installing reference files..."
-    Copy-Item (Join-Path $ScriptDir "skills" "blog" "references" "*.md") (Join-Path $SkillDir "blog" "references") -Force
+    Copy-Item (Join-Path (Join-Path (Join-Path (Join-Path $ScriptDir "skills") "blog") "references") "*.md") (Join-Path (Join-Path $SkillDir "blog") "references") -Force
 
     # Copy templates
-    if (Test-Path (Join-Path $ScriptDir "skills" "blog" "templates")) {
+    if (Test-Path (Join-Path (Join-Path (Join-Path $ScriptDir "skills") "blog") "templates")) {
         Write-Color White "Installing content templates..."
-        Copy-Item (Join-Path $ScriptDir "skills" "blog" "templates" "*.md") (Join-Path $SkillDir "blog" "templates") -Force
+        Copy-Item (Join-Path (Join-Path (Join-Path (Join-Path $ScriptDir "skills") "blog") "templates") "*.md") (Join-Path (Join-Path $SkillDir "blog") "templates") -Force
     }
 
     # Copy sub-skills (auto-discovers all skill directories)
@@ -104,18 +104,18 @@ function Main {
     }
 
     # Create personas directory for blog-persona
-    New-Item -ItemType Directory -Force -Path (Join-Path $SkillDir "blog" "references" "personas") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path (Join-Path (Join-Path $SkillDir "blog") "references") "personas") | Out-Null
 
     # Copy agents
     Write-Color White "Installing agents..."
-    Get-ChildItem -File (Join-Path $ScriptDir "agents" "*.md") | ForEach-Object {
+    Get-ChildItem -File (Join-Path (Join-Path $ScriptDir "agents") "*.md") | ForEach-Object {
         Copy-Item $_.FullName (Join-Path $AgentDir $_.Name) -Force
         Write-Color Green "  + $($_.BaseName)"
     }
 
     # Copy scripts
     Write-Color White "Installing scripts..."
-    Copy-Item (Join-Path $ScriptDir "scripts" "analyze_blog.py") (Join-Path $SkillDir "blog" "scripts" "analyze_blog.py") -Force
+    Copy-Item (Join-Path (Join-Path $ScriptDir "scripts") "analyze_blog.py") (Join-Path (Join-Path (Join-Path $SkillDir "blog") "scripts") "analyze_blog.py") -Force
 
     # Install Python dependencies (closes audit VULN-507/804: capture stderr
     # to a logfile instead of swallowing it).
@@ -159,9 +159,9 @@ function Main {
 
     Write-Color White "Installed:"
     Write-Color Green "  Main skill:   blog/ (orchestrator + 14 references + 12 templates)"
-    Write-Color Green "  Sub-skills:   22 (21 commands + 1 internal)"
-    Write-Color Green "  Agents:       4 specialists"
-    Write-Color Green "  Scripts:      analyze_blog.py"
+    Write-Color Green "  Sub-skills:   28 (27 commands + 1 internal blog-chart)"
+    Write-Color Green "  Agents:       5 specialists"
+    Write-Color Green "  Scripts:      analyze_blog.py + per-skill scripts"
     Write-Color White ""
     Write-Color White "Commands available:"
     Write-Color Cyan  "  /blog write <topic>        Write a new blog post"

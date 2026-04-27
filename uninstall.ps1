@@ -9,8 +9,8 @@ function Write-Color($Color, $Text) {
 }
 
 function Main {
-    $SkillDir = Join-Path $env:USERPROFILE ".claude" "skills"
-    $AgentDir = Join-Path $env:USERPROFILE ".claude" "agents"
+    $SkillDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "skills"
+    $AgentDir = Join-Path (Join-Path $env:USERPROFILE ".claude") "agents"
 
     Write-Color Cyan "=== Uninstalling claude-blog ==="
     Write-Host ""
@@ -47,8 +47,8 @@ function Main {
     # to VULN-805 in cybersec audit: cookies/tokens left behind post-uninstall
     # is a meaningful exposure window).
     $credPaths = @(
-        (Join-Path $env:USERPROFILE ".config" "claude-seo" "oauth-token.json"),
-        (Join-Path $env:USERPROFILE ".config" "claude-seo" "google-api.json")
+        (Join-Path (Join-Path (Join-Path $env:USERPROFILE ".config") "claude-seo") "oauth-token.json"),
+        (Join-Path (Join-Path (Join-Path $env:USERPROFILE ".config") "claude-seo") "google-api.json")
     )
     foreach ($credPath in $credPaths) {
         if (Test-Path $credPath) {
