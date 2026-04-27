@@ -17,6 +17,12 @@ freshness update schedules, content decay detection, template recommendations,
 distribution planning, and seasonal hooks. Optimized for building topical
 authority (Google) and maintaining citation freshness (AI platforms).
 
+## Cross-reference
+
+This skill operates at the FLOW Find stage. Before selecting topics, run
+`/blog flow find` for keyword discovery, content prioritization, and audience
+avatar prompts that should inform cluster selection and topic sequencing.
+
 ## Workflow
 
 ### Step 1: Understand the Blog
