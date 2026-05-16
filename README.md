@@ -53,7 +53,7 @@ install.sh and pin a release tag, closing audit VULN-005):
 ```bash
 git clone https://github.com/AgriciDaniel/claude-blog.git
 cd claude-blog
-git checkout v1.7.1          # pin to a release tag
+git checkout v1.8.1          # pin to a release tag (latest as of 2026-05-17)
 chmod +x install.sh && ./install.sh
 ```
 
@@ -240,9 +240,13 @@ claude-blog/
 │   ├── cognitive_load.py               # Per-section concept-density analyzer (v1.8.0)
 │   ├── discourse_research.py           # Discourse brief synthesis from SERP JSON (v1.8.0)
 │   └── sync_flow.py                    # FLOW reference sync (stdlib, sandboxed)
-├── tests/                              # pytest test suite
+├── tests/                              # pytest test suite (72 tests, 71 pass + 1 graceful skip)
 │   ├── conftest.py
-│   └── test_analyze_blog.py
+│   ├── test_analyze_blog.py
+│   ├── test_cognitive_load.py          # v1.8.0
+│   ├── test_discourse_research.py      # v1.8.0
+│   ├── test_security_guardrails.py
+│   └── test_security_v1_8_0.py         # v1.8.0 (path traversal + DoS + contract regression)
 ├── docs/                               # 6 documentation files
 ├── .github/workflows/ci.yml           # CI pipeline
 ├── install.sh                          # Unix/macOS installer (fallback)

@@ -58,9 +58,14 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import errno
 import json
+import math
+import os
 import re
+import stat
 import sys
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -119,13 +124,79 @@ MAX_INPUT_BYTES = 25 * 1024 * 1024   # 25 MB cap on results JSON (DoS guard)
 MAX_DECOMP_BYTES = 256 * 1024        # 256 KB cap on decomposition file
 MAX_ITEMS = 10_000                   # cap on items in results array
 MAX_STDIN_BYTES = 25 * 1024 * 1024   # cap on stdin reads
+MAX_JSON_DEPTH = 50                  # max nesting depth (defends against deeply-nested DoS, CWE-674)
+
+# Scoring weights (documented for future recalibration; see score_item())
+RECENCY_WEIGHT = 60.0            # recency contributes up to 60 of 100
+ENGAGEMENT_WEIGHT = 40.0         # engagement contributes up to 40 of 100
+ENGAGEMENT_LOG_FLOOR = 10        # engagement<10 treated as 10 (log-smoothing)
+ENGAGEMENT_LOG_SCALE = 8.0       # 8 pts per order of magnitude
+
+# String field length caps (defend against megabyte-string DoS and renderer abuse)
+MAX_STRING_FIELD = 4_000
 
 REQUIRED_FIELDS = {"platform", "url", "title", "snippet"}
 OPTIONAL_FIELDS = {"date", "engagement_proxy"}
+ALLOWED_URL_SCHEMES = ("http://", "https://")
+
+
+def _read_safely(path: Path, max_bytes: int, label: str) -> str:
+    """Read a path with TOCTOU-resistant defenses.
+
+    Uses os.open(O_NOFOLLOW) where available (POSIX) to atomically refuse
+    symlinks AND prevent a swap between the check and the read (CWE-367).
+    On Windows (no O_NOFOLLOW), falls back to is_symlink check; small TOCTOU
+    window remains but symlink refusal still applies.
+
+    Refuses: missing files, symlinks (CWE-59), non-regular files
+    (FIFOs/devices/sockets), oversize inputs (DoS).
+    Returns decoded UTF-8 string. Caller must catch ValueError / FileNotFoundError.
+    """
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    else:  # Windows: do best-effort symlink check first (TOCTOU residual)
+        if path.is_symlink():
+            raise ValueError(
+                f"{label} is a symlink; refusing to follow for safety: {path}"
+            )
+    try:
+        fd = os.open(str(path), flags)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"{label} not found: {path}") from e
+    except OSError as e:
+        if e.errno == errno.ELOOP:  # O_NOFOLLOW hit a symlink
+            raise ValueError(
+                f"{label} is a symlink; refusing to follow for safety: {path}"
+            ) from e
+        raise ValueError(f"{label} could not be opened safely: {path} ({e})") from e
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise ValueError(f"{label} is not a regular file: {path}")
+        if st.st_size > max_bytes:
+            raise ValueError(
+                f"{label} exceeds size cap ({st.st_size} bytes > {max_bytes}): {path}"
+            )
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            fd = -1  # ownership transferred to file object
+            return f.read(max_bytes + 1)
+    finally:
+        if fd != -1:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
 
 def _validate_input_path(path: Path, max_bytes: int, label: str) -> Path:
-    """Validate a CLI file path. Closes path-traversal, symlink, and DoS vectors."""
+    """Refuses symlinks (CWE-59), non-regular files, and oversize inputs (DoS).
+
+    Does NOT confine input to a base directory; the caller is responsible for
+    overall path safety. Kept for callers that only need a validated Path
+    object; new callers should prefer _read_safely() which closes the TOCTOU
+    window via O_NOFOLLOW.
+    """
     if not path.exists():
         raise FileNotFoundError(f"{label} not found: {path}")
     if path.is_symlink():
@@ -140,6 +211,22 @@ def _validate_input_path(path: Path, max_bytes: int, label: str) -> Path:
             f"{label} exceeds size cap ({size} bytes > {max_bytes}): {path}"
         )
     return path
+
+
+def _check_json_depth(obj: Any, max_depth: int, current: int = 0) -> None:
+    """Refuse pathologically-nested JSON (CWE-674). Recursion-error guard.
+
+    Walks the tree iteratively where possible; raises ValueError once any
+    container's nesting exceeds max_depth.
+    """
+    if current > max_depth:
+        raise ValueError(f"JSON nesting depth exceeds cap ({max_depth})")
+    if isinstance(obj, dict):
+        for v in obj.values():
+            _check_json_depth(v, max_depth, current + 1)
+    elif isinstance(obj, list):
+        for v in obj:
+            _check_json_depth(v, max_depth, current + 1)
 
 
 def _validate_output_path(path_str: str) -> Path:
@@ -157,50 +244,97 @@ def _validate_output_path(path_str: str) -> Path:
 
 
 def _validate_item(item: Any, index: int) -> dict[str, Any]:
-    """Validate one result item against the JSON schema. Returns the item if valid."""
+    """Validate one result item against the JSON schema.
+
+    Enforces: object shape, required fields present, string types on required
+    fields, URL scheme http/https only, and length caps (defends FIND-003 type
+    confusion, FIND-004/019 markdown/URL injection, oversized-string DoS).
+    Returns a NEW dict with truncated/whitespace-collapsed string fields.
+    """
     if not isinstance(item, dict):
-        raise ValueError(f"Result item {index} is not an object: got {type(item).__name__}")
+        raise ValueError(
+            f"Result item {index} is not an object: got {type(item).__name__}"
+        )
     missing = REQUIRED_FIELDS - set(item.keys())
     if missing:
         raise ValueError(
             f"Result item {index} missing required fields: {sorted(missing)}"
         )
-    return item
+    out: dict[str, Any] = {}
+    for field in REQUIRED_FIELDS:
+        v = item[field]
+        if not isinstance(v, str):
+            raise ValueError(
+                f"Result item {index} field {field!r} must be string, got "
+                f"{type(v).__name__}"
+            )
+        if len(v) > MAX_STRING_FIELD:
+            raise ValueError(
+                f"Result item {index} field {field!r} exceeds {MAX_STRING_FIELD} chars"
+            )
+        # Collapse control characters that break markdown rendering
+        out[field] = "".join(c for c in v if c == "\n" or ord(c) >= 0x20)
+    # URL scheme allowlist (defends FIND-019 javascript:/file:/data: URLs)
+    if not out["url"].lower().startswith(ALLOWED_URL_SCHEMES):
+        raise ValueError(
+            f"Result item {index} url scheme must be http or https: {out['url'][:80]!r}"
+        )
+    # Optional fields pass-through with type-relaxed handling downstream
+    for field in OPTIONAL_FIELDS:
+        if field in item:
+            out[field] = item[field]
+    return out
 
 
 def load_results(input_path: str) -> list[dict[str, Any]]:
     """Load and validate a JSON array of result objects.
 
-    Source: file path or stdin ('-'). Enforces size cap, schema, and item count
-    to defend against DoS and malformed-input crashes.
+    Source: file path or stdin ('-'). Enforces size cap, JSON-depth cap,
+    schema, and item count to defend against DoS and malformed-input crashes.
     """
     if input_path == "-":
         raw = sys.stdin.read(MAX_STDIN_BYTES + 1)
         if len(raw) > MAX_STDIN_BYTES:
             raise ValueError(f"stdin input exceeds size cap ({MAX_STDIN_BYTES} bytes)")
     else:
-        validated = _validate_input_path(Path(input_path), MAX_INPUT_BYTES, "Input file")
-        raw = validated.read_text(encoding="utf-8")
+        raw = _read_safely(Path(input_path), MAX_INPUT_BYTES, "Input file")
+        if len(raw) > MAX_INPUT_BYTES:
+            raise ValueError(
+                f"Input file exceeds size cap ({MAX_INPUT_BYTES} bytes)"
+            )
     if not raw.strip():
         return []
-    data = json.loads(raw)
+    try:
+        data = json.loads(raw)
+    except RecursionError as e:  # FIND-002: deeply-nested JSON
+        raise ValueError(
+            "JSON exceeds Python parser recursion limit (deeply-nested input)"
+        ) from e
     if not isinstance(data, list):
         raise ValueError("Input must be a JSON array of result objects.")
     if len(data) > MAX_ITEMS:
         raise ValueError(
             f"Result array length {len(data)} exceeds cap ({MAX_ITEMS})"
         )
+    # CWE-674 depth guard (catches deep-nesting attacks that don't trip the
+    # parser limit but would still exhaust recursion in user-side processing)
+    for item in data:
+        _check_json_depth(item, MAX_JSON_DEPTH)
     return [_validate_item(item, i) for i, item in enumerate(data)]
-    return data
 
 
 def parse_date(value: Any) -> dt.date | None:
+    """Parse a date string. ISO 8601 only ('YYYY-MM-DD') plus 'YYYY/MM/DD'
+    and the unambiguous 'Mon DD, YYYY' form. Ambiguous slash-formats like
+    '02/03/2026' (US dd/mm vs European mm/dd) are explicitly NOT accepted
+    to prevent ~30-day drift in freshness classification (FIND-016).
+    """
     if not value:
         return None
     if isinstance(value, dt.date):
         return value
     if isinstance(value, str):
-        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y", "%b %d, %Y"):
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%b %d, %Y"):
             try:
                 return dt.datetime.strptime(value.strip(), fmt).date()
             except ValueError:
@@ -209,17 +343,24 @@ def parse_date(value: Any) -> dt.date | None:
 
 
 def parse_engagement(value: Any) -> int:
-    """Best-effort numeric parse of engagement strings like '1.2k', '450 upvotes'."""
+    """Best-effort numeric parse of engagement strings like '1.2k', '450 upvotes'.
+
+    The suffix [kmb] is anchored: a letter must appear DIRECTLY after the
+    digits (no separating whitespace) AND must be terminal in its token.
+    This prevents the FIND-001 catastrophe where '5 best ideas' parsed as
+    5,000,000,000 because the regex matched 'b' from 'best'.
+    """
     if value is None:
         return 0
     if isinstance(value, (int, float)):
         return int(value)
     s = str(value).lower().replace(",", "")
-    m = re.search(r"(\d+(?:\.\d+)?)\s*([kmb]?)", s)
+    # Anchored suffix: digit-immediate-letter, terminated by non-letter or end-of-token.
+    m = re.search(r"\b(\d+(?:\.\d+)?)([kmb])?(?![a-z0-9])", s)
     if not m:
         return 0
     n = float(m.group(1))
-    suffix = m.group(2)
+    suffix = m.group(2) or ""
     multiplier = {"k": 1_000, "m": 1_000_000, "b": 1_000_000_000}.get(suffix, 1)
     return int(n * multiplier)
 
@@ -230,24 +371,33 @@ def parse_engagement(value: Any) -> int:
 
 
 def score_item(item: dict[str, Any], today: dt.date, window_days: int) -> float:
-    """Combined recency (60%) + engagement (40%) score in [0, 100]."""
+    """Combined recency + engagement score in [0, 100].
+
+    Recency contributes up to RECENCY_WEIGHT (60). Engagement contributes up
+    to ENGAGEMENT_WEIGHT (40) on a log scale (ENGAGEMENT_LOG_FLOOR=10 means
+    engagement<10 is treated as 10).
+    """
     date = parse_date(item.get("date"))
     if date is None:
-        recency_score = 30.0  # unknown date - middling
+        recency_score = RECENCY_WEIGHT * 0.5
     else:
         age_days = max(0, (today - date).days)
         if age_days > window_days * 3:
             recency_score = 0.0
         else:
-            recency_score = max(0.0, 60.0 * (1 - age_days / (window_days * 3)))
+            recency_score = max(
+                0.0, RECENCY_WEIGHT * (1 - age_days / (window_days * 3))
+            )
 
     engagement = parse_engagement(item.get("engagement_proxy"))
     if engagement == 0:
-        engagement_score = 5.0  # unknown - middling-low
+        engagement_score = 5.0  # unknown engagement: middling-low
     else:
-        # log-scale; 10 = 8 pts, 100 = 16, 1000 = 24, 10000 = 32, 100000 = 40
-        import math
-        engagement_score = min(40.0, 8.0 * math.log10(max(10, engagement)))
+        engagement_score = min(
+            ENGAGEMENT_WEIGHT,
+            ENGAGEMENT_LOG_SCALE
+            * math.log10(max(ENGAGEMENT_LOG_FLOOR, engagement)),
+        )
     return round(recency_score + engagement_score, 1)
 
 
@@ -296,38 +446,56 @@ def cluster_by_theme(
     return clusters
 
 
+_SPECIFICS_KEYWORD_RE = re.compile(
+    r"\b(command|config|setup|fix|workaround|how to|step|version)\b"
+    r"|```"          # fenced code block
+    r"|`[^`\n]+`",   # inline code span (bounded, not lone backtick)
+    re.IGNORECASE,
+)
+
+
+def _is_recent(item: dict[str, Any], today: dt.date, window_days: int) -> bool:
+    d = parse_date(item.get("date"))
+    return d is not None and (today - d).days <= window_days
+
+
 def classify_clusters(
     clusters: list[dict[str, Any]],
     today: dt.date,
     window_days: int,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Sort clusters into NEW / CONSENSUS / CONTRARIAN / SPECIFICS buckets."""
+    """Sort clusters into NEW / CONSENSUS / NICHE / SPECIFICS buckets.
+
+    NICHE was previously labeled "contrarian" but the rule (singleton cluster)
+    does not detect opposition, only isolation. Renamed for honesty (FIND-023).
+    Specifics now applies its own recency filter (FIND-006) instead of
+    inheriting the bucket-level filter, and uses a stricter regex that
+    requires whole-word keywords or actual code-fence syntax (FIND-008).
+    """
     new_themes = []
     consensus_themes = []
-    contrarian_themes = []
+    niche_themes = []
     specifics = []
 
     for cluster in clusters:
         platforms = {i.get("platform") for i in cluster["items"]}
         item_count = len(cluster["items"])
         recent_count = sum(
-            1
-            for i in cluster["items"]
-            if (d := parse_date(i.get("date"))) and (today - d).days <= window_days
+            1 for i in cluster["items"] if _is_recent(i, today, window_days)
         )
         if recent_count >= 2 and len(platforms) >= 2:
             consensus_themes.append(cluster)
         elif recent_count >= 1 and item_count == 1:
-            contrarian_themes.append(cluster)
+            niche_themes.append(cluster)
         elif recent_count >= 1:
             new_themes.append(cluster)
-        if any(
-            re.search(r"(command|config|setup|fix|workaround|how to|step|version|`)", i.get("snippet", "").lower())
-            for i in cluster["items"]
-        ):
-            specifics.extend(cluster["items"])
+        # FIND-006: specifics MUST be recent (the brief is freshness-promised).
+        for i in cluster["items"]:
+            if not _is_recent(i, today, window_days):
+                continue
+            if _SPECIFICS_KEYWORD_RE.search(i.get("snippet", "") or ""):
+                specifics.append(i)
 
-    # Dedup specifics by URL, cap at 5
     seen = set()
     specifics_unique = []
     for s in specifics:
@@ -341,7 +509,7 @@ def classify_clusters(
     return {
         "new": new_themes[:5],
         "consensus": consensus_themes[:4],
-        "contrarian": contrarian_themes[:3],
+        "niche": niche_themes[:3],
         "specifics": specifics_unique,
     }
 
@@ -351,26 +519,75 @@ def classify_clusters(
 # ---------------------------------------------------------------------------
 
 
+def _safe_link_text(text: str) -> str:
+    """Sanitize markdown-link display text. Collapses whitespace, escapes
+    brackets that would terminate the link, drops control characters.
+    Defends FIND-004 (markdown link injection via `]` in title) and FIND-010
+    (link corruption via embedded newlines).
+    """
+    if not text:
+        return ""
+    # Collapse all whitespace runs (incl. \n, \r, \t) into single spaces.
+    collapsed = " ".join(text.split())
+    # Escape the markdown-link terminator and the backslash that could be
+    # used to bypass the escape.
+    return collapsed.replace("\\", "\\\\").replace("]", r"\]").replace("[", r"\[")
+
+
+def _safe_link_url(url: str) -> str | None:
+    """Validate a URL for safe markdown-link rendering.
+    Returns the url if it is http/https; None otherwise (FIND-019).
+    Also rejects URLs containing whitespace or a literal `)` that would
+    truncate the link in renderers.
+    """
+    if not url:
+        return None
+    if not url.lower().startswith(ALLOWED_URL_SCHEMES):
+        return None
+    if any(c in url for c in (" ", "\t", "\n", "\r", ")", "(")):
+        return None
+    return url
+
+
 def render_inline_link(item: dict[str, Any]) -> str:
-    """LAW 5: every citation as [name](url). LAW 2: never invent titles."""
-    url = item.get("url", "")
-    title = item.get("title") or item.get("platform", "source")
+    """LAW 5: every citation as [name](url). LAW 2: never invent titles.
+
+    Sanitizes title (FIND-004 / FIND-010) and validates URL scheme (FIND-019)
+    so a hostile SERP item cannot inject a clickable javascript:/file:/data:
+    link or break markdown rendering with bracket characters in the title.
+    """
+    raw_url = item.get("url") or ""
+    raw_title = item.get("title") or item.get("platform") or "source"
     platform = item.get("platform", "")
     label = PLATFORM_LABELS.get(platform, platform.capitalize()) if platform else ""
-    name = title[:80]
+    name = _safe_link_text(raw_title)[:80]
     if label and label.lower() not in name.lower():
-        name = f"{name} ({label})"
-    if not url:
+        name = f"{name} ({_safe_link_text(label)})"
+    safe_url = _safe_link_url(raw_url)
+    if not safe_url:
         return name
-    return f"[{name}]({url})"
+    return f"[{name}]({safe_url})"
+
+
+def _safe_snippet(text: str) -> str:
+    """Sanitize snippet text for inline rendering inside markdown prose.
+
+    Escapes markdown link syntax (`[` and `]`) so a snippet containing
+    `[evil](https://attacker.com)` cannot inject a clickable link into the
+    brief (FIND-004 defense in depth for snippets, not just titles).
+    Strips em-dashes (LAW 3) and clamps to 200 chars.
+    """
+    if not text:
+        return ""
+    cleaned = strip_em_dashes(text)[:200].strip()
+    return cleaned.replace("\\", "\\\\").replace("]", r"\]").replace("[", r"\[")
 
 
 def render_cluster_paragraph(cluster: dict[str, Any]) -> str:
     items = cluster["items"]
     theme = cluster["theme"].replace("-", " ").title()
     sources = ", ".join(render_inline_link(i) for i in items[:3])
-    sample_snippet = (items[0].get("snippet") or "")[:200].strip()
-    sample_snippet = strip_em_dashes(sample_snippet)
+    sample_snippet = _safe_snippet(items[0].get("snippet") or "")
     if sample_snippet:
         body = f"{sample_snippet} Cited in {sources}."
     else:
@@ -424,21 +641,23 @@ def render_markdown(
         lines.append("- No cross-platform consensus themes detected.")
     lines.append("")
 
-    lines.append("## Contrarian / minority takes")
+    lines.append("## Niche / single-source themes")
     lines.append("")
-    if buckets["contrarian"]:
-        for cluster in buckets["contrarian"]:
+    if buckets["niche"]:
+        for cluster in buckets["niche"]:
             lines.append(render_cluster_paragraph(cluster))
     else:
-        lines.append("- None surfaced. Absence is honest; do not invent contrarian takes.")
+        lines.append(
+            "- None surfaced. Absence is honest; do not invent contrarian takes."
+        )
     lines.append("")
 
     lines.append("## Practitioner specifics (commands, configs, links)")
     lines.append("")
     if buckets["specifics"]:
         for item in buckets["specifics"]:
-            snippet = strip_em_dashes((item.get("snippet") or "").strip())
-            lines.append(f"- {render_inline_link(item)}: {snippet[:160]}")
+            snippet = _safe_snippet(item.get("snippet") or "")[:160]
+            lines.append(f"- {render_inline_link(item)}: {snippet}")
     else:
         lines.append("- No concrete practitioner specifics surfaced in the window.")
     lines.append("")
@@ -497,7 +716,7 @@ def build_brief(
         "platform_breakdown": dict(platform_breakdown),
         "themes_new": [cluster_summary(c) for c in buckets["new"]],
         "themes_consensus": [cluster_summary(c) for c in buckets["consensus"]],
-        "themes_contrarian": [cluster_summary(c) for c in buckets["contrarian"]],
+        "themes_niche": [cluster_summary(c) for c in buckets["niche"]],
         "specifics_count": len(buckets["specifics"]),
         "markdown": markdown,
     }
@@ -553,7 +772,23 @@ def main() -> int:
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             return 2
-        out_path.write_text(brief["markdown"], encoding="utf-8")
+        # Atomic write (FIND-018): write to sibling .tmp then os.replace.
+        # Avoids partial DISCOURSE.md if the process is killed mid-write.
+        tmp_fd, tmp_path = tempfile.mkstemp(
+            prefix=out_path.name + ".",
+            suffix=".tmp",
+            dir=str(out_path.parent),
+        )
+        try:
+            with os.fdopen(tmp_fd, "w", encoding="utf-8") as tmp_f:
+                tmp_f.write(brief["markdown"])
+            os.replace(tmp_path, out_path)
+        except Exception:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
         print(json.dumps({k: v for k, v in brief.items() if k != "markdown"}, indent=2))
     elif args.format == "json":
         print(json.dumps(brief, indent=2))

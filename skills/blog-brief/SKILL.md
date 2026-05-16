@@ -49,11 +49,11 @@ If only a topic is given, infer the rest from context.
 ### Step 2: Keyword Research
 
 Using WebSearch:
-1. Search for the target keyword -- analyze what currently ranks
+1. Search for the target keyword; analyze what currently ranks
 2. Identify **primary keyword** (exact match target)
 3. Identify **3-5 secondary keywords** (related terms, long-tail)
 4. Identify **3-5 question queries** (People Also Ask style)
-5. Note the **search intent** -- what do searchers actually want?
+5. Note the **search intent**: what do searchers actually want?
 
 ### Step 2.5: Template Recommendation
 
@@ -145,7 +145,7 @@ Alternative titles:
 
 ## TL;DR Draft
 > **TL;DR:** [40-60 word summary with key finding + 1 statistic + source.
-> Should be self-contained -- a reader who only reads this box gets the
+> Should be self-contained; a reader who only reads this box gets the
 > core value of the article.]
 
 ## Information Gain Opportunities
@@ -227,7 +227,7 @@ claim that can stand alone when quoted.
 ## Competitive Gaps to Exploit
 1. [What competitors miss that we should cover]
 2. [Unique angle or original data we can provide]
-3. [Format advantage -- charts/visuals competitors lack]
+3. [Format advantage: charts/visuals competitors lack]
 
 ## Internal Link Architecture
 - **Link TO** (from this new post to existing pages):

@@ -66,9 +66,9 @@ For 21 evidence-led optimization prompts (AI-detector test, CTR audit, schema, P
    - **AI content percentage estimate** - Based on burstiness, phrase density, and
      TTR, estimate what percentage of the content reads as AI-generated (0-100%).
      Report as: "AI content estimate: ~X%"
-   - **Tier 2 structural reflex scan** (v1.8.0) - The Tier 1 checks above are
-     vocabulary-level. Tier 2 catches what survives them: structural and rhythmic
-     tics LLMs default to after the obvious words are replaced. Run against
+   - **Second-order structural reflex scan** (v1.8.0) - The first-order checks above
+     are vocabulary-level. The second-order pass catches what survives them: structural
+     and rhythmic tics LLMs default to after the obvious words are replaced. Run against
      `skills/blog/references/ai-slop-detection.md`. Flag at minimum:
      - Question-cadence H2s above 70% of headings
      - Three or more "Here..." paragraph openers
@@ -81,7 +81,10 @@ For 21 evidence-led optimization prompts (AI-detector test, CTR audit, schema, P
      - Listicle pre-list intro above 250 words
      - Opening-word repetition: top three first-words above 25% share
      - Paragraph-shape SD below 25 (visual monotony)
-     A draft is only "AI-detection clean" when both tiers pass.
+     A draft is only "AI-detection clean" when both passes are clean. The two-namespace
+     terminology (first-order/second-order for slop-detection vs Tier 1/2/3 for source
+     authority) is intentional: see `skills/blog/references/ai-slop-detection.md` for
+     why the labels diverged in v1.8.1.
 4. **Video embed check**:
    - Count existing YouTube embeds in the post
    - If 0 embeds, flag: "No video embeds. YouTube has the strongest AI visibility correlation (0.737)"

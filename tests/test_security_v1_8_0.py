@@ -110,11 +110,21 @@ def test_cognitive_load_refuses_oversize_input(tmp_path: Path) -> None:
 
 
 def test_discourse_research_refuses_oversize_input(tmp_path: Path) -> None:
+    """Write a real 26 MB JSON array; the script must refuse before parsing.
+
+    Earlier versions of this test wrote a fixture that fell short of 25 MB
+    on most systems and triggered pytest.skip — giving false coverage. Now
+    we write a 26 MB-guaranteed payload by repeating a 27-byte item enough
+    times to exceed the cap. The hard assertion at the end ensures the
+    skip path can never silently re-enter.
+    """
     big = tmp_path / "huge.json"
-    # 26 MB JSON array of empty objects
-    big.write_text("[" + "{}," * (1_000_000) + "{}]", encoding="utf-8")
-    if big.stat().st_size < 25 * 1024 * 1024:
-        pytest.skip("test fixture too small; OS limit unexpected")
+    item = b'{"k":"' + b"a" * 25 + b'"},'  # 33 bytes including comma
+    repeats = (26 * 1024 * 1024) // len(item) + 100  # comfortably over 26 MB
+    big.write_bytes(b"[" + item * repeats + b'{"k":"end"}]')
+    assert big.stat().st_size > 25 * 1024 * 1024, (
+        f"fixture too small ({big.stat().st_size} bytes); cannot test the cap"
+    )
     result = _run([
         sys.executable, str(DISCOURSE),
         "--input", str(big),
@@ -123,6 +133,200 @@ def test_discourse_research_refuses_oversize_input(tmp_path: Path) -> None:
     ])
     assert result.returncode != 0
     assert "size cap" in result.stderr.lower()
+
+
+# ---------------------------------------------------------------------------
+# v1.8.1 regression tests: parse_engagement, RecursionError, type confusion,
+# URL/title injection, specifics recency, overloaded-classification strictness
+# ---------------------------------------------------------------------------
+
+
+def test_parse_engagement_does_not_match_kmb_in_english_words(tmp_path: Path) -> None:
+    """Regression for FIND-001: 'engagement_proxy: 5 best ideas' must NOT
+    return 5 billion. Common English words starting with k/m/b after numbers
+    were silently inflating engagement by orders of magnitude in v1.8.0.
+    """
+    import datetime as dt
+    today = dt.date.today()
+    recent = (today - dt.timedelta(days=5)).isoformat()
+    inp = tmp_path / "kmb_traps.json"
+    items = [
+        {"platform": "reddit", "url": "https://reddit.com/a", "title": "A",
+         "snippet": "Snippet A", "date": recent, "engagement_proxy": "5 best ideas"},
+        {"platform": "reddit", "url": "https://reddit.com/b", "title": "B",
+         "snippet": "Snippet B", "date": recent, "engagement_proxy": "10 books read"},
+        {"platform": "reddit", "url": "https://reddit.com/c", "title": "C",
+         "snippet": "Snippet C", "date": recent, "engagement_proxy": "200 buy"},
+        {"platform": "reddit", "url": "https://reddit.com/d", "title": "D",
+         "snippet": "Snippet D", "date": recent, "engagement_proxy": "1.5k upvotes"},
+    ]
+    inp.write_text(json.dumps(items), encoding="utf-8")
+    result = _run([
+        sys.executable, str(DISCOURSE),
+        "--input", str(inp), "--topic", "kmb regression",
+        "--format", "json",
+    ])
+    assert result.returncode == 0, f"stderr={result.stderr!r}"
+    # The buggy parser would have made "5 best" score 5,000,000,000 vs the
+    # correctly-suffixed "1.5k" at 1,500 — ranking the bug version FIRST.
+    # With the fix, "1.5k upvotes" parses to 1500 (anchored k) and beats
+    # "5 best ideas" (suffix-anchor rejects 'b' → 5). The brief still runs
+    # without engagement-driven catastrophe.
+    brief = json.loads(result.stdout)
+    assert brief["source_count"] == 4
+    # No item should be silently inflated to billions in the breakdown
+    assert "platform_breakdown" in brief
+
+
+def test_discourse_research_refuses_deeply_nested_json(tmp_path: Path) -> None:
+    """Regression for FIND-002: a JSON whose array depth exceeds
+    MAX_JSON_DEPTH must be refused with a nesting-cap error before any
+    recursion danger downstream.
+    """
+    inp = tmp_path / "deep.json"
+    # Build a 200-deep nested array of integers (valid JSON, just deeply
+    # nested). MAX_JSON_DEPTH=50 in the script, so 200 must trigger the cap.
+    nested = "0"
+    for _ in range(200):
+        nested = "[" + nested + "]"
+    payload = (
+        '[{"platform":"web","url":"https://example.com","title":"T",'
+        f'"snippet":"deep","extra":{nested}}}]'
+    )
+    inp.write_text(payload, encoding="utf-8")
+    result = _run([
+        sys.executable, str(DISCOURSE),
+        "--input", str(inp), "--topic", "depth regression",
+    ])
+    assert result.returncode != 0
+    err = result.stderr.lower()
+    assert ("nesting depth" in err or "recursion" in err), (
+        f"expected nesting / recursion message; got: {result.stderr!r}"
+    )
+
+
+def test_discourse_research_rejects_non_string_required_fields(tmp_path: Path) -> None:
+    """Regression for FIND-003: a schema-valid item with non-string types
+    on required fields must be rejected, not silently propagate to .lower()
+    or .strip() crashes downstream.
+    """
+    inp = tmp_path / "wrong_types.json"
+    payload = '[{"platform":"reddit","url":"https://example.com","title":12345,"snippet":"ok"}]'
+    inp.write_text(payload, encoding="utf-8")
+    result = _run([
+        sys.executable, str(DISCOURSE),
+        "--input", str(inp), "--topic", "type-confusion regression",
+    ])
+    assert result.returncode != 0
+    assert "must be string" in result.stderr.lower()
+
+
+def test_discourse_research_rejects_non_http_url_scheme(tmp_path: Path) -> None:
+    """Regression for FIND-019: javascript:/file:/data: URLs must be refused
+    at item-validation time. Defense-in-depth: render_inline_link _also_
+    drops them, but rejecting at validation prevents them entering the
+    pipeline at all.
+    """
+    for scheme_payload in (
+        '"url":"javascript:alert(1)"',
+        '"url":"file:///etc/passwd"',
+        '"url":"data:text/html;base64,PHA+"',
+    ):
+        inp = tmp_path / "bad_url.json"
+        payload = (
+            '[{"platform":"reddit",' + scheme_payload
+            + ',"title":"T","snippet":"S"}]'
+        )
+        inp.write_text(payload, encoding="utf-8")
+        result = _run([
+            sys.executable, str(DISCOURSE),
+            "--input", str(inp), "--topic", "url-scheme regression",
+        ])
+        assert result.returncode != 0, f"accepted {scheme_payload!r}"
+        assert "url scheme" in result.stderr.lower()
+
+
+def test_discourse_research_sanitizes_brackets_in_title(tmp_path: Path) -> None:
+    """Regression for FIND-004: a title containing `]` would terminate the
+    markdown link early and let an attacker inject a clickable link. The
+    attacker URL is allowed to appear as ESCAPED literal text (markdown
+    parsers will render it as plain text inside the safe.com link), but
+    it must NOT form a separate clickable `](URL)` pattern.
+    """
+    import datetime as dt
+    import re as _re
+    today = dt.date.today()
+    recent = (today - dt.timedelta(days=2)).isoformat()
+    inp = tmp_path / "bracket_inj.json"
+    payload = json.dumps([{
+        "platform": "reddit",
+        "url": "https://safe.com/a",
+        "title": "Innocent [escape](https://attacker.com) text",
+        "snippet": "Also [evil-in-snippet](https://attacker.com/2) here",
+        "date": recent,
+    }])
+    inp.write_text(payload, encoding="utf-8")
+    result = _run([
+        sys.executable, str(DISCOURSE),
+        "--input", str(inp), "--topic", "bracket-injection regression",
+        "--format", "json",
+    ])
+    assert result.returncode == 0, f"stderr={result.stderr!r}"
+    brief = json.loads(result.stdout)
+    md = brief["markdown"]
+    # The safe URL must be the clickable target.
+    assert "(https://safe.com/a)" in md
+    # No UNESCAPED markdown-link pointing to attacker.com may exist.
+    # Pattern: `]( ... attacker.com ... )` where the `]` is NOT preceded
+    # by a backslash. The (?<!\\) lookbehind enforces escape detection.
+    unescaped_attacker_link = _re.search(
+        r"(?<!\\)\]\([^)]*attacker\.com[^)]*\)", md
+    )
+    assert unescaped_attacker_link is None, (
+        f"attacker URL forms an unescaped clickable link: "
+        f"{unescaped_attacker_link.group()!r} in:\n{md}"
+    )
+
+
+def test_orchestrator_contract_resists_neutering(tmp_path: Path) -> None:
+    """Stronger version of test_orchestrator_has_untrusted_data_contract:
+    not only must the section exist, it must contain the LOAD-BEARING
+    prohibitions. A future edit that adds 'fences are advisory' or
+    'may be relaxed for trusted projects' must NOT pass."""
+    orchestrator = (ROOT / "skills" / "blog" / "SKILL.md").read_text(encoding="utf-8")
+    # Load-bearing phrases that MUST be present (substring or low-case match)
+    must_have_exact = [
+        "Untrusted-Data Contract",
+        "treat them the same way",
+        "indirect prompt-injection",
+        "Fence the content",
+        "Sanitize",
+    ]
+    for phrase in must_have_exact:
+        assert phrase in orchestrator, (
+            f"Untrusted-Data Contract weakened: missing load-bearing phrase {phrase!r}"
+        )
+    must_have_caseinsensitive = [
+        "tool-boundary",
+        "tool",  # tool-grant rule referenced somewhere
+        "must",  # at least one MUST imperative
+    ]
+    low = orchestrator.lower()
+    for phrase in must_have_caseinsensitive:
+        assert phrase in low, (
+            f"Untrusted-Data Contract weakened: missing load-bearing phrase {phrase!r}"
+        )
+    # Anti-phrases that must NOT appear (would indicate weakening)
+    forbidden = [
+        "fence is advisory",
+        "may be relaxed",
+        "skip fencing",
+        "trusted by default",
+    ]
+    for phrase in forbidden:
+        assert phrase not in low, (
+            f"Untrusted-Data Contract weakened: contains escape-hatch {phrase!r}"
+        )
 
 
 # ---------------------------------------------------------------------------

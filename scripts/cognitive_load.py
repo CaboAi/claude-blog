@@ -32,8 +32,11 @@ Thresholds (per cognitive-load.md):
 from __future__ import annotations
 
 import argparse
+import errno
 import json
+import os
 import re
+import stat
 import sys
 from pathlib import Path
 from typing import Any
@@ -75,7 +78,16 @@ NUMERIC_RE = re.compile(
     r"\b\d+(?:\.\d+)?(?:st|nd|rd|th)?\b"
 )
 
-ENTITY_RE = re.compile(r"\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b")
+# Entity detector: matches Title-Case multi-word phrases OR all-caps acronyms.
+# Adding the acronym branch closes the FIND-014 false-negative where tech-blog
+# posts (the target corpus) were under-counted because phrases like "NASA",
+# "IBM", "GPT-4", "JSON", "REST", "API", "LLM" never matched.
+ENTITY_RE = re.compile(
+    r"\b(?:"
+    r"[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3}"        # Title Case (1-4 words)
+    r"|[A-Z]{2,}(?:[-\d][A-Z0-9]+)*"             # all-caps acronyms (NASA, GPT-4)
+    r")\b"
+)
 
 H2_RE = re.compile(r"^(##\s+.+)$", re.MULTILINE)
 
@@ -118,19 +130,39 @@ def count_sentences(text: str) -> int:
     return max(1, len([s for s in sentences if s.strip()]))
 
 
+_COMMON_OPENERS = frozenset({
+    "The", "This", "That", "These", "Those", "It", "We", "You", "They",
+    "I", "He", "She", "Me", "Him", "Her", "Us", "Them",
+    "If", "When", "While", "Where", "How", "What", "Why", "Who",
+    "First", "Second", "Third", "Next", "Then", "Now", "Here",
+    "Most", "Some", "All", "Every", "Each", "Both",
+    "And", "Or", "But", "For", "Yet", "So", "With", "Without",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+})
+
+# All-caps tokens that are common-English words, not entities.
+_ALLCAPS_NOISE = frozenset({"US", "UK", "OK", "I", "A", "USA"})
+
+
 def find_entities(text: str) -> set[str]:
-    """Capitalized multi-word phrases. Filters obvious non-entities."""
-    common = {
-        "The", "This", "That", "These", "Those", "It", "We", "You", "They",
-        "If", "When", "While", "Where", "How", "What", "Why", "Who",
-        "First", "Second", "Third", "Next", "Then", "Now", "Here",
-        "Most", "Some", "All", "Every", "Each", "Both",
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
-    }
+    """Title-Case multi-word phrases AND all-caps acronyms. Filters
+    obvious non-entities (sentence-leading pronouns, weekdays, months,
+    common all-caps words like 'US', 'OK').
+    """
     found = ENTITY_RE.findall(text)
-    return {e for e in found if e.split()[0] not in common and len(e) > 2}
+    out: set[str] = set()
+    for e in found:
+        if len(e) <= 2:
+            continue
+        first = e.split()[0]
+        if first in _COMMON_OPENERS:
+            continue
+        if e.isupper() and e in _ALLCAPS_NOISE:
+            continue
+        out.add(e)
+    return out
 
 
 def count_numeric_claims(text: str) -> int:
@@ -195,7 +227,9 @@ def score_section(
     new_entities = entities - prior_entities
     prior_entities.update(new_entities)
 
-    per_100 = lambda n: round(n * 100 / words, 2) if words else 0.0
+    def per_100(n: int) -> float:
+        return round(n * 100 / words, 2)
+
     new_entity_density = per_100(len(new_entities))
     numeric_claims = count_numeric_claims(body)
     numeric_claim_density = per_100(numeric_claims)
@@ -236,7 +270,9 @@ def score_section(
 
 
 def analyze(path: Path, jargon: set[str]) -> dict[str, Any]:
-    text = path.read_text(encoding="utf-8")
+    # Use TOCTOU-resistant read instead of path.read_text() (closes the
+    # check-vs-read race that the prior validation left open).
+    text = _read_safely(path, MAX_INPUT_BYTES, "Input file")
     sections = split_sections(text)
     prior_entities: set[str] = set()
     seen_jargon: set[str] = set()
@@ -301,13 +337,64 @@ MAX_INPUT_BYTES = 10 * 1024 * 1024  # 10 MB cap on any input file (DoS guard)
 MAX_JARGON_BYTES = 1 * 1024 * 1024   # 1 MB cap on jargon list
 
 
-def _validate_input_path(path: Path, max_bytes: int, label: str) -> Path:
-    """Validate a CLI file path. Closes path-traversal, symlink, and DoS vectors.
+def _read_safely(path: Path, max_bytes: int, label: str) -> str:
+    """Read a path with TOCTOU-resistant defenses.
 
-    - Refuses symlinks (CWE-59) so a hostile symlink to /etc/passwd or /dev/zero is rejected.
-    - Refuses non-regular files (no FIFOs, devices, sockets).
-    - Enforces a size cap so a 100 GB file cannot exhaust memory.
-    Raises ValueError on any failure with a message safe for stderr.
+    Uses os.open(O_NOFOLLOW) where available (POSIX) to atomically refuse
+    symlinks AND prevent a swap between the check and the read (CWE-367).
+    On Windows (no O_NOFOLLOW), falls back to is_symlink check; small TOCTOU
+    window remains but symlink refusal still applies.
+
+    Refuses: missing files, symlinks (CWE-59), non-regular files
+    (FIFOs/devices/sockets), oversize inputs (DoS).
+    Does NOT confine input to a base directory; the caller is responsible
+    for overall path safety. Returns decoded UTF-8 string.
+    Raises ValueError or FileNotFoundError on failure.
+    """
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    else:
+        if path.is_symlink():
+            raise ValueError(
+                f"{label} is a symlink; refusing to follow for safety: {path}"
+            )
+    try:
+        fd = os.open(str(path), flags)
+    except FileNotFoundError as e:
+        raise ValueError(f"{label} not found: {path}") from e
+    except OSError as e:
+        if e.errno == errno.ELOOP:
+            raise ValueError(
+                f"{label} is a symlink; refusing to follow for safety: {path}"
+            ) from e
+        raise ValueError(f"{label} could not be opened safely: {path} ({e})") from e
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode):
+            raise ValueError(f"{label} is not a regular file: {path}")
+        if st.st_size > max_bytes:
+            raise ValueError(
+                f"{label} exceeds size cap ({st.st_size} bytes > {max_bytes}): {path}"
+            )
+        with os.fdopen(fd, "r", encoding="utf-8") as f:
+            fd = -1
+            return f.read(max_bytes + 1)
+    finally:
+        if fd != -1:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+
+def _validate_input_path(path: Path, max_bytes: int, label: str) -> Path:
+    """Refuses symlinks (CWE-59), non-regular files, and oversize inputs (DoS).
+
+    Does NOT confine input to a base directory; the caller is responsible
+    for overall path safety. Retained for callers that only need a validated
+    Path object. Prefer _read_safely() for new code (closes TOCTOU window
+    via O_NOFOLLOW where available).
     """
     if not path.exists():
         raise ValueError(f"{label} not found: {path}")
@@ -347,12 +434,12 @@ def main() -> int:
     jargon = set(DEFAULT_JARGON)
     if args.jargon:
         try:
-            jargon_path = _validate_input_path(
+            jargon_text = _read_safely(
                 args.jargon, MAX_JARGON_BYTES, "Jargon file"
             )
             jargon.update(
                 line.strip().lower()
-                for line in jargon_path.read_text(encoding="utf-8").splitlines()
+                for line in jargon_text.splitlines()
                 if line.strip()
             )
         except ValueError as e:

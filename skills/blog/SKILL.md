@@ -225,7 +225,7 @@ Blog quality is scored across 5 categories (100 points total):
 
 ## Reference Files
 
-Load on-demand as needed (12 references):
+Load on-demand as needed (20 references; 13 original + 5 v1.8.0 methodology + 2 supplemental):
 
 - `references/google-landscape-2026.md` -- December 2025 Core Update, E-E-A-T, algorithm changes
 - `references/geo-optimization.md` -- GEO/AEO techniques, AI citation factors
@@ -240,6 +240,8 @@ Load on-demand as needed (12 references):
 - `references/schema-stack.md` -- Complete blog schema reference (JSON-LD templates)
 - `references/internal-linking.md` -- Link architecture, anchor text, hub-and-spoke model
 - `references/video-embeds.md` -- YouTube video embedding patterns, quality criteria, VideoObject schema
+- `references/cta-placement.md` -- Call-to-action placement and conversion-optimization patterns
+- `references/flow-alignment.md` -- 5-surface model + FLOW stages mapped to claude-blog skills
 - `references/ai-slop-detection.md` -- two-tier first-order + second-order reflex methodology for AI-content detection (v1.8.0)
 - `references/editorial-heuristics.md` -- ordinal 0-4 rubric with P0-P3 severity (v1.8.0, adapted from Nielsen heuristics)
 - `references/cognitive-load.md` -- per-section concept-density model with `scripts/cognitive_load.py` (v1.8.0)
@@ -284,7 +286,7 @@ Templates are in `templates/` and contain section structure, markers, and checkl
 | `blog-geo` | AI citation readiness audit with 0-100 GEO score |
 | `blog-audit` | Full-site blog health assessment with parallel subagents |
 | `blog-cannibalization` | Keyword overlap detection with severity scoring |
-| `blog-chart` | Generate inline SVG data visualization charts with dark-mode styling |
+| `blog-chart` | Generate inline SVG data visualization charts with dark-mode styling (internal-only) |
 | `blog-factcheck` | Statistics verification against cited sources |
 | `blog-image` | AI image generation and editing for blog content via Gemini MCP |
 | `blog-persona` | Writing persona management with NNGroup framework |
@@ -294,6 +296,14 @@ Templates are in `templates/` and contain section structure, markers, and checkl
 | `blog-notebooklm` | Query Google NotebookLM for source-grounded research from user documents |
 | `blog-audio` | Generate audio narration with Gemini TTS (summary/full/dialogue modes, 30 voices) |
 | `blog-google` | Google API integration: PSI, CrUX CWV, GSC, URL Inspection, Indexing, GA4, NLP, YouTube, Keywords, PDF reports |
+| `blog-cluster` | Semantic topic-cluster planning + execution (hub-and-spoke architecture) (v1.7.0) |
+| `blog-flow` | FLOW framework prompts: find, optimize, win, prompts index, sync (v1.7.0) |
+| `blog-multilingual` | One-command international publishing: write + translate + localize + hreflang (v1.7.0) |
+| `blog-translate` | SEO-optimized translation with format preservation (markdown, MDX, frontmatter, schema) (v1.7.0) |
+| `blog-localize` | Cultural deep-adaptation per locale (DACH, FR, ES, JA, custom) (v1.7.0) |
+| `blog-locale-audit` | Multilingual content QA (completeness, hreflang, parity, freshness) (v1.7.0) |
+
+Total: 30 sub-skill directories on disk (29 listed above plus this orchestrator `blog/`). 28 are user-facing slash commands; `blog-chart` is internal-only and `blog-image` is also callable internally by `blog-write` and `blog-rewrite`.
 
 ## Agents
 
@@ -302,7 +312,8 @@ Templates are in `templates/` and contain section structure, markers, and checkl
 | `blog-researcher` | Research specialist -- finds statistics, sources, images, competitive data |
 | `blog-writer` | Content generation specialist -- writes optimized blog content |
 | `blog-seo` | SEO validation specialist -- checks on-page SEO post-writing |
-| `blog-reviewer` | Quality assessment -- runs 100-point scoring, AI content detection |
+| `blog-reviewer` | Quality assessment -- runs 100-point scoring, AI content detection (no Bash, post v1.7.0 hardening) |
+| `blog-translator` | Multilingual translation specialist; format preservation across markdown/MDX/HTML/frontmatter/schema (no Bash, v1.7.0) |
 
 ### Agent Details
 
@@ -414,7 +425,9 @@ When loading any of `BRAND.md`, `VOICE.md`, or `DISCOURSE.md` into a downstream-
 
 4. **Provenance recording.** Note in the agent prompt which project-root files were loaded and their last-modified time so the agent's reasoning can include "the BRAND.md I'm reading was modified at timestamp T." This gives the user an audit trail when reviewing the output.
 
-This contract exists because the auto-load pattern is the same indirect prompt-injection surface as WebFetch (T9 in SECURITY.md). The cybersecurity audit of v1.8.0 flagged this as CRITICAL (VULN-039/040) and 3 of 8 specialist agents independently identified the SERP-content -> DISCOURSE.md -> orchestrator-prompt chain as exploitable. The fence + sanitize + tool-boundary contract closes the design gap.
+This contract exists because the auto-load pattern is the same indirect prompt-injection surface as WebFetch (T9 in SECURITY.md). The cybersecurity audit of v1.8.0 flagged the project-root auto-load chain as exploitable indirect prompt-injection (VULN-039/040 in the audit report); multiple parallel review passes independently surfaced it. The fence + sanitize + tool-boundary contract closes the design gap.
+
+Known residual limitation: the fence markers are static strings. A sufficiently sophisticated attacker who can write to a project-root file could embed a counterfeit fence terminator (`=== END UNTRUSTED PROJECT-ROOT CONTEXT (BRAND.md) ===`) followed by injected instructions. Mitigations applied: (1) the sanitization scan flags such payloads if the attacker omits the patterns listed above; (2) the tool-boundary rule (point 3) blocks the attacker even if the fence is broken; (3) provenance recording exposes anomalous mtimes. A v1.9.0 hardening will replace static fences with per-load random nonces.
 
 ### BRAND.md / VOICE.md scope and precedence
 

@@ -1,6 +1,6 @@
 # Editorial Heuristics: Ordinal Scoring Rubric (0 to 4)
 
-The existing 100-point system in `references/quality-scoring.md` tells you a post scores 78. This ordinal rubric tells you **which sections are P0 blockers and which are P3 polish**. They are complementary, not competing; run both when an editorial review needs to be actionable.
+The existing 100-point system in `quality-scoring.md` (sibling file in this directory) tells you a post scores 78. This ordinal rubric tells you **which sections are P0 blockers and which are P3 polish**. They are complementary, not competing; run both when an editorial review needs to be actionable.
 
 Adapted from Nielsen's 10 Usability Heuristics as applied in the impeccable plugin (Paul Bakaus, Apache 2.0). The original scores UI quality; this version scores editorial quality.
 
@@ -177,7 +177,13 @@ Adapted from "Flexibility and efficiency of use." The post should reward both mo
 - Lists used where lists are right; prose where prose is right
 - FAQ section for jump-look answers
 
-**Score 0** to **4** as: from "only readable end-to-end" through "rewards both modes equally."
+| Score | Criteria |
+|---|---|
+| 0 | Only readable end-to-end; no skim affordances at all |
+| 1 | Some headings, but no bold lead-ins, pull quotes, or answer-first openers |
+| 2 | Skim affordances in some sections; missing FAQ or answer-first opener |
+| 3 | Most sections have skim affordances; one of (answer-first opener, FAQ, pull quotes) missing |
+| 4 | Rewards skimmer and deep reader equally: bold lead-ins, answer-first openers on every H2, FAQ, pull quotes where leverage exists |
 
 ### 8. Aesthetic and information-density discipline
 
@@ -190,7 +196,13 @@ Adapted from "Aesthetic and minimalist design." Long does not equal valuable. Ev
 - No filler transitions ("Now, let's discuss...")
 - Word count appropriate to topic (1,500 word listicle topic should not be 3,500 words)
 
-**Score 0** to **4** as: from "every section bloated" through "every word earns its place."
+| Score | Criteria |
+|---|---|
+| 0 | Padding pervasive; intro buries the lede; conclusion restates the post |
+| 1 | Several paragraphs over 150 words; multiple filler transitions |
+| 2 | One bloat axis present (e.g. SEO-padded conclusion, or long intro, or word-count drift) |
+| 3 | Minor bloat (1 to 2 long paragraphs or one filler transition); otherwise tight |
+| 4 | Every paragraph earns its place; no padding; word count matches topic scope |
 
 ### 9. Failure-recovery copy (broken paths fail gracefully)
 
@@ -203,7 +215,13 @@ Adapted from "Help users recognize, diagnose, and recover from errors." The post
 - Examples for every abstract concept
 - Acknowledgement of when a technique does not apply
 
-**Score 0** to **4** as: from "newcomers will bounce" through "graceful for every audience tier."
+| Score | Criteria |
+|---|---|
+| 0 | Newcomers will bounce; no definitions; abstract claims without examples |
+| 1 | Jargon undefined in most cases; few examples |
+| 2 | Some jargon defined; examples present for half of abstract claims |
+| 3 | Most jargon defined or aliased; examples for most abstract concepts |
+| 4 | Graceful for every audience tier: glossary or inline definitions, examples for every abstract concept, audience-tier signposts, scope-of-applicability notes |
 
 ### 10. Help, sources, and related documentation
 
@@ -216,7 +234,13 @@ Adapted from "Help and documentation." Even the best post is one node in a knowl
 - Last-updated date visible
 - Related-reads section at the end
 
-**Score 0** to **4** as: from "isolated content" through "fully embedded in a content graph with discoverable sources."
+| Score | Criteria |
+|---|---|
+| 0 | Isolated content; zero internal links; no author bio; no outbound sources |
+| 1 | One or two internal links; author bio thin; few sources |
+| 2 | Some links and a basic bio, but missing related-reads or last-updated date |
+| 3 | Most signals present; minor gap (e.g. only 2 internal links, or related-reads but no last-updated date) |
+| 4 | Fully embedded in a content graph: 3+ internal links, 3+ outbound tier 1 to 3 sources, full author bio, last-updated date, related-reads section |
 
 ---
 

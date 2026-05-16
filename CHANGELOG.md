@@ -7,6 +7,180 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-05-17
+
+A post-v1.8.0 hostile-review hardening pass. The v1.8.0 commit landed locally on
+2026-05-16. A hostile re-audit (cybersec + GitHub + documentation, three parallel
+review tracks) caught defects the original ship-readiness assertion missed. This
+release closes them. No new features; security, correctness, and documentation
+fixes only.
+
+### Security
+
+- **scripts/discourse_research.py `parse_engagement`**: catastrophic regex bug
+  fixed. The prior `r"(\d+(?:\.\d+)?)\s*([kmb]?)"` matched any number followed
+  by whitespace and any `k`, `m`, or `b` anywhere — so `"5 best ideas"` parsed
+  as 5,000,000,000 (5 billion) and silently misranked every brief's sources by
+  orders of magnitude. New regex requires the suffix letter to be immediately
+  adjacent to the digits AND terminate at a non-letter or end-of-token.
+- **scripts/discourse_research.py: type-confusion hardening**. `_validate_item`
+  now enforces `isinstance(field, str)` for `platform`, `url`, `title`,
+  `snippet`; rejects non-http(s) URL schemes (closes javascript:/file:/data:
+  injection); strips control characters; clamps strings to MAX_STRING_FIELD
+  (4 KB). Prior to v1.8.1 a `{"snippet":[1,2,3]}` crashed later code with
+  `AttributeError: 'list' object has no attribute 'lower'` and dumped a
+  traceback to stderr (CWE-209 info disclosure).
+- **scripts/discourse_research.py: JSON-depth cap**. New `_check_json_depth`
+  refuses inputs with nesting > 50 levels. Bypassed the 25 MB size cap with a
+  ~100 KB pathologically-nested payload; prior code dumped a `RecursionError`
+  traceback to stderr (CWE-209) and returned code 1 instead of 2.
+- **scripts/discourse_research.py + scripts/cognitive_load.py: TOCTOU-resistant
+  reads**. New `_read_safely` uses `os.open(path, O_RDONLY | O_NOFOLLOW)` on
+  POSIX to atomically refuse symlinks AND prevent a swap between the check and
+  the read (CWE-367). Falls back to is_symlink + read on Windows where
+  O_NOFOLLOW is unavailable (TOCTOU residual remains there).
+- **scripts/discourse_research.py: markdown-link injection hardening**.
+  `_safe_link_text` collapses whitespace, escapes `[` and `]` to `\[` and `\]`;
+  `_safe_link_url` rejects any URL not starting with http:// or https://, or
+  containing whitespace / parentheses. `_safe_snippet` extends the escape to
+  snippet text so a snippet containing `[evil](https://attacker.com)` cannot
+  inject a clickable link. Defense-in-depth: schema validation at item-time +
+  rendering escape at output-time + orchestrator fence at consumption-time.
+- **scripts/discourse_research.py: atomic output write**. The brief is now
+  written to a sibling `<output>.tmp` then `os.replace()`d into place. Prior
+  code used `Path.write_text()` non-atomically, leaving a truncated
+  DISCOURSE.md if the process was killed mid-write (downstream sub-skills then
+  auto-loaded the partial brief).
+- **scripts/discourse_research.py: dead-code removal**. Unreachable
+  `return data` after a list-comprehension return at line 194 of v1.8.0 was a
+  latent footgun for refactor-driven regression. Removed.
+- **scripts/discourse_research.py: specifics-bucket recency filter**. The
+  `specifics` bucket inherited cluster-level membership without its own
+  recency check, leaking stale-but-keyword-matching items into a brief that
+  promises 30-day freshness. Now requires per-item recency.
+- **scripts/discourse_research.py: code-fence regex tightened**. The lone
+  backtick alternative `(...|`)` in the specifics-trigger regex matched
+  ANY snippet containing a single backtick (extremely common). Replaced
+  with bounded code-fence patterns: \`\`\` or `` `bounded inline code` ``.
+- **skills/blog/SKILL.md: documented residual fence-injection risk**. The
+  v1.8.0 Untrusted-Data Contract uses static fence markers
+  (`=== BEGIN UNTRUSTED ... ===`). A counterfeit-terminator attack is
+  acknowledged in a Known residual limitation paragraph; a v1.9.0 hardening
+  will replace static fences with per-load random nonces. The
+  tool-boundary preservation rule still blocks the attacker even if the
+  fence is broken.
+- **Documentation**: blog-discourse/SKILL.md adds an explicit Phase 3.5
+  "WebSearch Untrusted-Data Contract" that requires the agent to sanitize
+  snippets for instruction-shaped patterns BEFORE writing them to the JSON
+  pipeline. The orchestrator-level fence protects DOWNSTREAM consumers; this
+  protects the script's INPUT from being weaponized at capture time.
+
+### Correctness
+
+- **scripts/cognitive_load.py: ALL-CAPS acronym detection**. The v1.8.0
+  `ENTITY_RE` required a lowercase character after the leading capital, so
+  NASA / IBM / GPT-4 / JSON / REST / SEO / API / LLM all returned ZERO new
+  entities. The target corpus (tech blogs) was systematically under-counted.
+  New regex includes an all-caps branch with optional digits/hyphens.
+- **scripts/cognitive_load.py: common-word filter extended**. Sentence-leading
+  pronouns "I", "He", "She" and conjunctions "And", "Or", "But", "For", "Yet",
+  "So", "With", "Without" added to the filter so Title-Case sentence openers
+  don't register as entities.
+- **scripts/cognitive_load.py: lambda assignment replaced with `def`** (PEP 8
+  E731 fix). The dead `else 0.0` branch is also removed; the function early-
+  returns when `words == 0` so the fallback was unreachable.
+- **scripts/discourse_research.py: `import math` moved to module top**
+  (PEP 8). Was inside `score_item`, executing on every call.
+- **scripts/discourse_research.py: `parse_date` rejects ambiguous slash
+  formats**. Previously accepted `02/03/2026` as US `%m/%d/%Y` silently,
+  drifting ~30 days when the source was European. Now only ISO 8601, slash-
+  separated ISO (`YYYY/MM/DD`), and the unambiguous `Mon DD, YYYY` form.
+- **scripts/discourse_research.py: "contrarian" bucket renamed "niche"**.
+  The rule `recent_count >= 1 AND item_count == 1` detects singleton-source
+  themes, not opposing opinion. The label is now accurate (FIND-023).
+- **scripts/discourse_research.py: magic numbers extracted to module
+  constants**: `RECENCY_WEIGHT`, `ENGAGEMENT_WEIGHT`, `ENGAGEMENT_LOG_FLOOR`,
+  `ENGAGEMENT_LOG_SCALE`, `MAX_STRING_FIELD`, `ALLOWED_URL_SCHEMES`,
+  `MAX_JSON_DEPTH`.
+
+### Tests
+
+- **tests/test_security_v1_8_0.py: oversize-input test no longer skips**.
+  The v1.8.0 fixture wrote a ~3 MB payload then `pytest.skip()`d because it
+  fell short of the 25 MB cap. The test never exercised the defense it
+  claimed to guard. Now writes 26 MB via byte-counted repetition with a hard
+  assertion that the fixture actually exceeds the cap.
+- **tests/test_security_v1_8_0.py: new regression tests** for each of the
+  v1.8.1 defenses: `test_parse_engagement_does_not_match_kmb_in_english_words`
+  (FIND-001), `test_discourse_research_refuses_deeply_nested_json` (FIND-002),
+  `test_discourse_research_rejects_non_string_required_fields` (FIND-003),
+  `test_discourse_research_rejects_non_http_url_scheme` (FIND-019),
+  `test_discourse_research_sanitizes_brackets_in_title` (FIND-004),
+  `test_orchestrator_contract_resists_neutering` (FIND-025; strengthens the
+  v1.8.0 test from "section exists" to "load-bearing prohibitions present
+  AND no escape-hatches added").
+- **Test count**: 78 pass + 0 skips (v1.8.0 was 71 pass + 1 skip).
+
+### Documentation
+
+- **skills/blog/SKILL.md**: reference count corrected from "12 references"
+  to "20 references; 13 original + 5 v1.8.0 methodology + 2 supplemental"
+  (matched the actual on-disk count which had drifted across v1.7.0 and
+  v1.8.0 additions). Sub-Skills table extended with the 6 v1.7.0 entries
+  (blog-cluster, blog-flow, blog-multilingual, blog-translate, blog-localize,
+  blog-locale-audit) that had been missing since v1.7.0. Agents table
+  extended with `blog-translator` (v1.7.0). Speculative "3 of 8 specialist
+  agents" claim softened to "multiple parallel review passes."
+- **skills/blog/references/editorial-heuristics.md**: broken cross-reference
+  `references/quality-scoring.md` corrected to sibling-path
+  `quality-scoring.md`. Heuristics #7, #8, #9, #10 gained explicit 0-4
+  criteria tables that match the format of heuristics #1-6 (the v1.8.0
+  rubric was asymmetric: half the heuristics had detailed tables, half had
+  only "Score 0 through 4 as: from ... through ...").
+- **skills/blog/references/ai-slop-detection.md**: terminology collision
+  fixed. The v1.8.0 file used "Tier 1 / Tier 2" for the detection passes,
+  colliding with the project-wide "Tier 1 / 2 / 3" source-authority labels.
+  Renamed to "first-order / second-order" (the methodology already used
+  those words; "Tier 1/2" was an unnecessary alias). A namespace disambiguation
+  note explains the convention.
+- **skills/blog-rewrite/SKILL.md**: matched terminology rename.
+- **skills/blog-discourse/SKILL.md**: `--from-file` documented in the
+  Commands table renamed to `--input` to match the script's actual flag
+  (`scripts/discourse_research.py --input`). Argument-hint updated.
+  `mkstemp` snippet now closes the returned file descriptor (pedagogical
+  correctness). Phase 3.5 WebSearch Untrusted-Data Contract added.
+  "Contrarian" section renamed to "Niche / single-source themes" to match
+  the script's renamed bucket.
+- **docs/COMMANDS.md**: Command Overview table extended from 18 entries to
+  29 (the v1.7.0 and v1.8.0 commands that had been missing from the
+  headline overview). New dedicated sections for `/blog brand` and
+  `/blog discourse` explain workflow phases, security model, and
+  composition with other sub-skills.
+- **.claude-plugin/marketplace.json**: description "28 skills, 5 agents"
+  updated to "30 sub-skills, 5 agents" so the plugin-marketplace listing
+  matches plugin.json (the discovery surface for self-hosted install).
+- **CITATION.cff**: removed `website:` under the `authors` block to satisfy
+  strict cff-version 1.2.0 validators. Top-level `url:` and
+  `repository-code:` cover the same role.
+- **README.md**: stale Architecture section tests/ listing extended to
+  include `test_cognitive_load.py`, `test_discourse_research.py`,
+  `test_security_guardrails.py`, `test_security_v1_8_0.py`. Install pin
+  bumped from `v1.7.1` to `v1.8.1`.
+- **skills/blog-strategy/SKILL.md, skills/blog-brief/SKILL.md**: 7 retained
+  ` -- ` prose violations replaced with `:`, `;`, or period-capital. The
+  broader bullet-list ` -- ` pattern is pre-existing across the codebase and
+  tracked for a v1.9.0 codebase-wide cleanup.
+
+### Acknowledgments
+
+This hardening pass was driven by a three-track hostile review (cybersec deep
+code audit + GitHub file-based audit + documentation quality audit, run in
+parallel against the v1.8.0 commit). The reviewers caught 27 specific
+defects with file:line evidence; this release closes the critical, high, and
+medium-severity findings. The remaining low/info findings are tracked in
+v1.9.0 milestones. See `tests/test_security_v1_8_0.py` for the regression
+suite that now guards each defense.
+
 ## [1.8.0] - 2026-05-16
 
 ### Methodology ports from impeccable (Paul Bakaus, Apache 2.0)

@@ -10,7 +10,9 @@ This reference defines a **two-tier reflex check** for editorial review. Run bot
 
 LLMs converge on a small set of safe patterns. The first thing the model reaches for is the **first-order reflex**: the genre-obvious tell. Replace it and the model reaches for the **second-order reflex**, the next-most-trained pattern that survives anti-AI guidance.
 
-Most AI-detection passes only check tier 1. The result is "anti-AI" rewrites that still read like AI because the structural tier was never touched.
+Most AI-detection passes only check the first-order pattern. The result is "anti-AI" rewrites that still read like AI because the structural pass was never run.
+
+**Note on terminology**: this file uses **"first-order"** and **"second-order"** for the two detection passes. Elsewhere in the project, "Tier 1 / Tier 2 / Tier 3" refers to *source authority* (Google Search Central = Tier 1, Ahrefs = Tier 2, reputable industry sources = Tier 3). The two namespaces are intentionally kept separate; do not call the second-order detection pass "Tier 2."
 
 Examples of the same idea across both tiers:
 
@@ -26,7 +28,7 @@ The point: **a draft can score zero on a phrase blocklist and still be obviously
 
 ---
 
-## Tier 1: First-order reflex (phrase + lexical)
+## First-order reflex (phrase + lexical)
 
 This is what the existing AI-detection in `blog-analyze` and `blog-rewrite` already covers. Documented here for completeness.
 
@@ -51,13 +53,13 @@ This is what the existing AI-detection in `blog-analyze` and `blog-rewrite` alre
 - Type-Token Ratio (TTR) below 0.40 on long-form
 - Burstiness (sentence-length standard deviation / mean) below 0.3
 
-**Outcome of Tier 1**: a "phrase-clean" draft. Necessary, not sufficient.
+**Outcome of the first-order pass**: a "phrase-clean" draft. Necessary, not sufficient.
 
 ---
 
-## Tier 2: Second-order reflex (structural + rhythmic)
+## Second-order reflex (structural + rhythmic)
 
-These are the patterns LLMs default to **after** the obvious vocabulary is replaced. They are structural and rhythmic, so a vocabulary swap doesn't fix them. Run this pass on drafts that already passed Tier 1.
+These are the patterns LLMs default to **after** the obvious vocabulary is replaced. They are structural and rhythmic, so a vocabulary swap doesn't fix them. Run this pass on drafts that already passed the first-order check.
 
 ### Structural tics to flag
 
@@ -93,14 +95,14 @@ These are the patterns LLMs default to **after** the obvious vocabulary is repla
 
 For `blog-rewrite` and `blog-reviewer`:
 
-1. Run Tier 1 first (phrase + lexical). If it fails, fix and re-run before moving on.
-2. Once Tier 1 is clean, run Tier 2. Report each second-order pattern with line numbers and an example.
-3. Do not declare "AI-detection passed" unless both tiers are clean.
+1. Run the first-order pass first (phrase + lexical). If it fails, fix and re-run before moving on.
+2. Once the first-order pass is clean, run the second-order pass. Report each second-order pattern with line numbers and an example.
+3. Do not declare "AI-detection passed" unless both passes are clean.
 
 For `blog-write` (initial drafting):
 
-- Tier 1 is enforced at generation time via the persona's anti-phrase list.
-- Tier 2 is checked once on the full draft before delivery.
+- First-order is enforced at generation time via the persona's anti-phrase list.
+- Second-order is checked once on the full draft before delivery.
 
 ---
 
@@ -111,13 +113,13 @@ When reporting findings, use:
 ```
 ## AI Slop Detection Report
 
-### Tier 1 (Phrase + Lexical)
+### First-order (Phrase + Lexical)
 - Trigger phrases: [N found] -> [list with line numbers]
 - AI trigger words: [N/1K words], [pass/fail at ≤5]
 - TTR: [score], [pass/fail at ≥0.40]
 - Burstiness: [score], [pass/fail at ≥0.3]
 
-### Tier 2 (Structural + Rhythmic)
+### Second-order (Structural + Rhythmic)
 - Question-cadence H2s: [X%], [pass/fail at ≤70%]
 - "Here" openers: [N], [pass/fail at ≤2]
 - Three-clause rhythm: [X%], [pass/fail at ≤50%]
@@ -133,17 +135,17 @@ When reporting findings, use:
 - Paragraph-shape SD: [value], [pass/fail at ≥25]
 
 ### Verdict
-Tier 1: [PASS / FAIL]
-Tier 2: [PASS / FAIL]
-Overall: [PASS only if both clean]
+First-order: [PASS / FAIL]
+Second-order: [PASS / FAIL]
+Overall: [PASS only if both passes clean]
 ```
 
 ---
 
 ## Why this matters for ranking + AI citations
 
-- **Google December 2025 Core Update**: rewards content that demonstrates "experience" and original perspective. Tier 2 patterns are exactly what makes "AI consensus content," the kind being demoted.
-- **AI citations**: ChatGPT and Perplexity reward citable, distinctive passages. Tier 2 tics produce interchangeable prose that no AI surface has reason to prefer over the source it was trained on.
+- **Google December 2025 Core Update**: rewards content that demonstrates "experience" and original perspective. Second-order patterns are exactly what makes "AI consensus content," the kind being demoted.
+- **AI citations**: ChatGPT and Perplexity reward citable, distinctive passages. Second-order tics produce interchangeable prose that no AI surface has reason to prefer over the source it was trained on.
 
 The two-tier check is the editorial parallel to impeccable's "design slop" methodology: vocabulary-clean is necessary but not sufficient; structural distinctiveness is what separates citeable content from indexable filler.
 

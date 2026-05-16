@@ -94,7 +94,11 @@ def test_happy_path_multi_platform(tmp_path: Path) -> None:
     assert "reddit" in brief["platform_breakdown"]
     assert "x" in brief["platform_breakdown"]
     # At least one cluster should be detected from the shared theme
-    total_clusters = len(brief["themes_new"]) + len(brief["themes_consensus"]) + len(brief["themes_contrarian"])
+    total_clusters = (
+        len(brief["themes_new"])
+        + len(brief["themes_consensus"])
+        + len(brief["themes_niche"])
+    )
     assert total_clusters >= 1
     # Markdown is embedded; it should contain at least one inline link
     assert "](" in brief["markdown"]
@@ -193,7 +197,7 @@ def test_output_file_write_integration_contract(tmp_path: Path) -> None:
     assert md_text.startswith("# Discourse Brief: integration test topic")
     assert "Window: last 30 days" in md_text
     # Required sections downstream skills look for
-    for section in ("## What's NEW", "## Consensus", "## Contrarian", "## Source breakdown"):
+    for section in ("## What's NEW", "## Consensus", "## Niche", "## Source breakdown"):
         assert section in md_text, f"missing section: {section}"
 
     # 2. JSON metadata printed on stdout (not the markdown body)

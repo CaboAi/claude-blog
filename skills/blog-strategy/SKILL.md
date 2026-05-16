@@ -79,10 +79,10 @@ Score each competitor's AI visibility:
 - **Low**: Rarely cited, only in niche queries
 - **None**: No AI citation presence detected
 
-Identify AI citation gaps -- queries where no competitor is cited. These
+Identify AI citation gaps: queries where no competitor is cited. These
 represent the highest-opportunity targets for new content.
 
-Note: Only 12% overlap between platforms -- a competitor strong on ChatGPT
+Note: only 12% overlap between platforms. A competitor strong on ChatGPT
 may be absent from Perplexity. Analyze each platform independently.
 
 ### Step 3: Audience Mapping
@@ -175,7 +175,7 @@ how to demonstrate genuine expertise:
 ### Step 5.5: AI Citation Surface Strategy
 
 Plan how to maximize AI citation across platforms. 80% of LLM citations
-come from outside the top 100 organic results -- traditional SEO alone
+come from outside the top 100 organic results. Traditional SEO alone
 is insufficient.
 
 #### On-Site Optimization
@@ -188,7 +188,7 @@ Structure every piece of content for AI citability:
 - **Entity clarity**: consistent terminology throughout (no synonym variation for key concepts)
 - **Structured data**: JSON-LD for Article, FAQ, HowTo, and Review schemas
 
-#### Off-Site Presence (Critical -- 88-92% of AI citations from off-site)
+#### Off-Site Presence (Critical: 88-92% of AI citations from off-site)
 
 | Channel | AI Citation Impact | Priority Action |
 |---------|-------------------|-----------------|
@@ -201,7 +201,7 @@ Structure every piece of content for AI citability:
 #### Cross-Platform Monitoring
 
 - Track brand mentions in ChatGPT, Perplexity, Google AI Overviews
-- Only 12% overlap between platforms -- optimize for each separately
+- Only 12% overlap between platforms; optimize for each separately
 - 80% of LLM citations come from outside the top 100 organic results
 - Monitor monthly: search 10-20 target queries on each platform, log citations
 
