@@ -109,11 +109,30 @@ def test_fence_content_prepends_warning_when_suspicious(tmp_path: Path):
 
 
 def test_fence_content_no_warning_on_clean_content(tmp_path: Path):
+    """Negative-path test (v1.8.4 strengthened): content with words that
+    only PARTIALLY match patterns must not trigger a warning. "auditor"
+    contains 'audit' but 'audit' is not in SUSPICIOUS_PATTERNS; the test
+    proves the linter is not over-eager. Also asserts the fenced block
+    contains the original content verbatim (positive assertion)."""
     mod = _import_helper()
     f = tmp_path / "BRAND.md"
-    f.write_text("audience: developers\nvoice: terse\n", encoding="utf-8")
+    content = (
+        "audience: developers and auditors\n"
+        "voice: terse, accountable, factual\n"
+        "topics: software design, code review, deployment\n"
+    )
+    f.write_text(content, encoding="utf-8")
     block = mod.fence_content(f, f.read_text())
-    assert "[!] WARNING:" not in block
+    assert "[!] WARNING:" not in block, (
+        "warning fired on clean content; pattern scan is over-eager"
+    )
+    # Positive: original content must appear verbatim in the fenced block.
+    assert content.strip() in block, (
+        "fenced block missing the original content body"
+    )
+    # The fence markers must appear at the boundaries.
+    assert block.startswith("=== BEGIN UNTRUSTED PROJECT-ROOT CONTEXT")
+    assert block.rstrip().endswith("===")
 
 
 # ---------------------------------------------------------------------------
@@ -174,6 +193,52 @@ def test_cli_nonces_unique_across_invocations(tmp_path: Path):
     assert len(set(nonces)) == 3, (
         f"nonces re-used across invocations: {nonces}"
     )
+
+
+# ---------------------------------------------------------------------------
+# v1.8.4 edge cases (empty file, UTF-8 BOM, stat-after-delete race)
+# ---------------------------------------------------------------------------
+
+
+def test_fence_content_empty_file_emits_info_warning(tmp_path: Path):
+    """A file with 0 usable bytes (after whitespace strip) should be
+    flagged with `[!] INFO:` so the orchestrator knows the load
+    succeeded but produced no usable context."""
+    mod = _import_helper()
+    f = tmp_path / "BRAND.md"
+    f.write_text("", encoding="utf-8")
+    block = mod.fence_content(f, "")
+    assert "[!] INFO:" in block, (
+        "empty file silently accepted without info note"
+    )
+    assert "body is empty" in block.lower()
+
+
+def test_fence_content_strips_utf8_bom(tmp_path: Path):
+    """UTF-8 BOM at file start must be stripped before fencing, otherwise
+    the BOM leaks into the agent prompt as garbled bytes."""
+    mod = _import_helper()
+    f = tmp_path / "BRAND.md"
+    bom_content = "﻿audience: developers\nvoice: terse\n"
+    f.write_text(bom_content, encoding="utf-8")
+    block = mod.fence_content(f, bom_content)
+    # BOM character (U+FEFF) must NOT appear in the output.
+    assert "﻿" not in block, "UTF-8 BOM leaked into fenced block"
+    # Content body must still appear without the BOM.
+    assert "audience: developers" in block
+
+
+def test_fence_content_raises_on_missing_file(tmp_path: Path):
+    """If the file no longer exists at stat time (race between read and
+    fence), v1.8.4 raises FileNotFoundError instead of emitting 'mtime
+    unknown'. Callers must catch and decide whether to abort the load."""
+    mod = _import_helper()
+    f = tmp_path / "BRAND.md"
+    f.write_text("data\n", encoding="utf-8")
+    content = f.read_text()
+    f.unlink()  # delete between read and fence
+    with pytest.raises(FileNotFoundError):
+        mod.fence_content(f, content)
 
 
 if __name__ == "__main__":

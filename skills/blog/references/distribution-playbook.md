@@ -26,7 +26,7 @@ is the dominant factor in whether AI systems cite your content.
 ## Reddit (Highest Growth Channel for AI Visibility)
 
 **Platform change (June 2023):** Reddit's API became paid ($0.24/1,000 calls). Free API
-access is gone. All Reddit strategy must rely on **organic participation only** — no
+access is gone. All Reddit strategy must rely on **organic participation only** - no
 programmatic posting, scraping, or API-driven automation without a paid plan.
 
 ### Why Reddit Matters for AI
@@ -193,7 +193,7 @@ Resources mentioned:
 
 **Algorithm change (late 2025):** YouTube Shorts' recommendation engine was fully decoupled
 from long-form video. Shorts no longer directly boost long-form channel authority or
-subscriber counts. Treat Shorts as a **separate discovery surface** with its own metrics —
+subscriber counts. Treat Shorts as a **separate discovery surface** with its own metrics -
 do not rely on Shorts to cross-promote your long-form content or blog. Use Shorts for
 top-of-funnel awareness only.
 
@@ -204,7 +204,7 @@ top-of-funnel awareness only.
 **Algorithm change (360Brew, late 2024-2025):** LinkedIn replaced its recommendation
 algorithm with an AI system called 360Brew. Impact: views down ~50%, engagement down ~25%
 industry-wide. External links are penalized ~60% in reach. **Native content strongly
-outperforms link posts** — text posts, native documents (carousels), and native video
+outperforms link posts** - text posts, native documents (carousels), and native video
 dramatically outreach posts with external URLs.
 
 ### Content Adaptation
@@ -384,7 +384,7 @@ and early traffic signals that benefit both traditional and AI search.
 - Multi-platform review presence gives 2.6-3.5x citation multiplier
   (Authoritas, 2025)
 - G2 accounts for 22-23% of review-platform citations (Radix via G2's own blog;
-  self-reported — Hall.com independent analysis found only 8.25%)
+  self-reported - Hall.com independent analysis found only 8.25%)
 - 33% of all review citations come from G2 (Profound via G2's blog; treat as directional)
 - Companies with profiles on 3+ platforms: 4.6-6.3 citations vs 1.8
   without (2.6-3.5x multiplier)

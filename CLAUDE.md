@@ -120,7 +120,7 @@ claude-blog/
 ## Development Rules
 
 - Keep SKILL.md files under 500 lines / 5000 tokens
-- SKILL.md frontmatter: only valid fields (name, description, user-invokable, argument-hint, compatibility, license, metadata, disable-model-invocation). Do NOT use `allowed-tools` -- it is not a Claude Code spec field
+- SKILL.md frontmatter: only valid fields (name, description, user-invokable, argument-hint, compatibility, license, metadata, disable-model-invocation). Do NOT use `allowed-tools`; it is not a Claude Code spec field
 - New reference files should be focused and under 200 lines. Existing comprehensive references (platform-guides, schema-stack, content-templates, distribution-playbook) are exempt from this guideline
 - Scripts must have docstrings, CLI interface, and JSON output
 - Follow kebab-case naming for all skill directories

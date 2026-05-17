@@ -497,6 +497,19 @@ def cluster_by_theme(
             # cohesion, do NOT emit a multi-item cluster on this keyword.
             # Skip; items remain unassigned and can singleton-cluster later
             # on a different keyword that genuinely binds them.
+            #
+            # TRADEOFF (v1.8.4 5TH-AUDIT-011 documentation): when N items
+            # share ONLY the primary keyword (no secondary overlap), the
+            # multi-item cluster is dropped entirely. Each item becomes a
+            # singleton on a DIFFERENT keyword. Net effect: the shared
+            # keyword disappears from the themes view. This is the strict
+            # interpretation of cohesion: a one-keyword overlap is NOT
+            # enough signal to call something a "theme". The alternative
+            # (lax: emit anyway on one-keyword overlap) re-introduces
+            # phantom-clustering. We chose strict. If a future requirement
+            # surfaces that the shared keyword should still be noted, add
+            # an "incidental_overlap" bucket separate from themes_new /
+            # themes_consensus / themes_niche.
             if not cohesive_keys:
                 continue
             unique_keys = cohesive_keys

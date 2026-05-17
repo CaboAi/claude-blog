@@ -33,7 +33,7 @@ metadata in a single structured entity.
 
 ### Full Property Reference
 
-**Note:** Google states "there are no required properties" for BlogPosting — all properties
+**Note:** Google states "there are no required properties" for BlogPosting - all properties
 below are recommended. `@context` and `@type` are required by the JSON-LD spec itself.
 
 | Property | Status | Type | Description |
@@ -251,7 +251,7 @@ Each breadcrumb item requires `@type`, `position`, `name`, and `item` (URL).
 
 **Important**: Since August 2023, Google restricted FAQ rich results to government and health
 authority websites only. For all other sites, **no FAQ rich results will appear in Google
-Search** — the markup produces no visual search enhancement.
+Search** - the markup produces no visual search enhancement.
 
 However, the markup is still worth including for AI citation reasons: LLMs parse your page's
 **visible FAQ text** (not the JSON-LD) and Q&A-formatted content improves extractability for

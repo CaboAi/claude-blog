@@ -90,12 +90,12 @@ Identifies content from forums, social media, niche blogs where people share
 - BlogPosting, Article
 - Organization, LocalBusiness
 - FAQPage (keep answers 40-60 words; note: rich results only shown for government/health
-  sites since Aug 2023 — still valuable for AI citation, not for Google rich snippets)
+  sites since Aug 2023 - still valuable for AI citation, not for Google rich snippets)
 - BreadcrumbList
 - Person (author credentials)
 - Product, SoftwareApplication
 - AggregateRating, Review (only supported on eligible types: Product, Recipe,
-  SoftwareApplication, LocalBusiness, Movie, Book — NOT on BlogPosting directly)
+  SoftwareApplication, LocalBusiness, Movie, Book - NOT on BlogPosting directly)
 
 ### Deprecated (Never Recommend)
 - HowTo (Sept 2023)

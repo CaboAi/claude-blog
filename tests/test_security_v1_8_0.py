@@ -113,7 +113,7 @@ def test_discourse_research_refuses_oversize_input(tmp_path: Path) -> None:
     """Write a real 26 MB JSON array; the script must refuse before parsing.
 
     Earlier versions of this test wrote a fixture that fell short of 25 MB
-    on most systems and triggered pytest.skip — giving false coverage. Now
+    on most systems and triggered pytest.skip, giving false coverage. Now
     we write a 26 MB-guaranteed payload by repeating a 27-byte item enough
     times to exceed the cap. The hard assertion at the end ensures the
     skip path can never silently re-enter.
@@ -168,7 +168,7 @@ def test_parse_engagement_does_not_match_kmb_in_english_words(tmp_path: Path) ->
     ])
     assert result.returncode == 0, f"stderr={result.stderr!r}"
     # The buggy parser would have made "5 best" score 5,000,000,000 vs the
-    # correctly-suffixed "1.5k" at 1,500 — ranking the bug version FIRST.
+    # correctly-suffixed "1.5k" at 1,500, ranking the bug version FIRST.
     # With the fix, "1.5k upvotes" parses to 1500 (anchored k) and beats
     # "5 best ideas" (suffix-anchor rejects 'b' → 5). The brief still runs
     # without engagement-driven catastrophe.
@@ -297,7 +297,7 @@ def test_skill_md_documents_untrusted_data_contract(tmp_path: Path) -> None:
 
     For the BEHAVIORAL test of the v1.8.3 nonce defense (proves nonces are
     actually generated and unique per load), see
-    tests/test_load_untrusted_root.py — that test exercises
+    tests/test_load_untrusted_root.py - that test exercises
     scripts/load_untrusted_root.py directly. The helper is the code-enforced
     layer; this test is the doc-presence layer.
     """

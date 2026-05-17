@@ -109,3 +109,55 @@ jobs:
             exit 1
           fi
           echo "No stale path references found"
+
+  lint-prose-hygiene:
+    # Enforces CONTRIBUTING.md prose rules (no em-dashes / en-dashes /
+    # ASCII double-hyphen). Added v1.8.4 after the 5th-round hostile audit
+    # found 31 markdown em-dashes the v1.8.2/v1.8.3 cleanup scripts missed.
+    # The actual check is `scripts/lint_prose.py` (fence-aware + backtick-aware).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.0 (SHA-pinned)
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Run prose-hygiene linter
+        run: python3 scripts/lint_prose.py
+
+  version-coherence:
+    # Asserts that pyproject.toml, plugin.json, CITATION.cff, AND the
+    # orchestrator skills/blog/SKILL.md frontmatter all report the same
+    # version. Added v1.8.4 after the 5th audit found SKILL.md:19 still
+    # said "1.8.0" while every other surface had moved to 1.8.3.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.0 (SHA-pinned)
+      - name: Compare version surfaces
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+
+          versions = {}
+          m = re.search(r'^version\s*=\s*"([^"]+)"',
+                        Path('pyproject.toml').read_text(), re.MULTILINE)
+          versions['pyproject.toml'] = m.group(1) if m else None
+          with open('.claude-plugin/plugin.json') as f:
+              versions['plugin.json'] = json.load(f).get('version')
+          m = re.search(r'^version:\s*(\S+)',
+                        Path('CITATION.cff').read_text(), re.MULTILINE)
+          versions['CITATION.cff'] = m.group(1) if m else None
+          skill = Path('skills/blog/SKILL.md').read_text()
+          m = re.search(r'^\s*version:\s*"?([^"\s]+)"?', skill, re.MULTILINE)
+          versions['skills/blog/SKILL.md'] = m.group(1) if m else None
+
+          print("Version surfaces:")
+          for k, v in versions.items():
+              print(f"  {k}: {v!r}")
+          unique = set(versions.values())
+          if len(unique) > 1:
+              print(f"\nERROR: version surfaces disagree: {unique}")
+              sys.exit(1)
+          print(f"\nAll version surfaces aligned at {unique.pop()!r}")
+          PY

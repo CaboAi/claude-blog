@@ -130,8 +130,8 @@ platform's answers. Retrieval bots (user-triggered) may not fully respect robots
 | ClaudeBot | Anthropic | Training | Yes |
 | Claude-SearchBot | Anthropic | Search indexing | Yes |
 | Claude-User | Anthropic | User retrieval | Yes |
-| ~~Claude-Web~~ | Anthropic | Deprecated | — |
-| ~~anthropic-ai~~ | Anthropic | Deprecated | — |
+| ~~Claude-Web~~ | Anthropic | Deprecated | - |
+| ~~anthropic-ai~~ | Anthropic | Deprecated | - |
 | Google-Extended | Google | AI/Gemini training | Yes |
 | Google-Agent | Google | Project Mariner agentic (2026) | Yes |
 | PerplexityBot | Perplexity | Search indexing | Yes |
@@ -208,7 +208,7 @@ summary of your site for LLMs. Place at site root: `https://example.com/llms.txt
 **Important caveat:** No major AI platform has confirmed reading llms.txt. Google's Gary Illyes
 stated Google doesn't support it (Jul 2025). Semrush testing showed zero AI crawler visits to
 llms.txt files across 9 test sites. It is low-cost to implement but benefits are currently
-unproven. Implement it — but don't rely on it as a visibility strategy.
+unproven. Implement it - but don't rely on it as a visibility strategy.
 
 ### Specification
 
@@ -306,7 +306,7 @@ Standard AI crawlers do not execute JavaScript. However, **agentic tools** are d
 - **Google-Agent / Project Mariner** (Google, 2026): Operates through Chrome with full rendering.
 
 These are user-directed agents, not automated crawlers. They can see JS-rendered content,
-but they do not replace the need for SSR — standard crawlers still dominate citation indexing.
+but they do not replace the need for SSR - standard crawlers still dominate citation indexing.
 
 ---
 

@@ -53,7 +53,7 @@ install.sh and pin a release tag, closing audit VULN-005):
 ```bash
 git clone https://github.com/AgriciDaniel/claude-blog.git
 cd claude-blog
-git checkout v1.8.3          # pin to a release tag (latest as of 2026-05-17)
+git checkout v1.8.4          # pin to a release tag (latest as of 2026-05-17)
 chmod +x install.sh && ./install.sh
 ```
 
@@ -193,7 +193,7 @@ claude-blog/
 ├── skills/
 │   ├── blog/                           # Main orchestrator
 │   │   ├── SKILL.md                    # Routes all 28 user-facing commands
-│   │   ├── references/                 # 19 on-demand reference docs (5 new in v1.8.0)
+│   │   ├── references/                 # 20 on-demand reference docs (5 new in v1.8.0)
 │   │   └── templates/                  # 12 content type templates
 │   ├── blog-write/SKILL.md            # Sub-skills (28 user-facing + 2 internal-only)
 │   ├── blog-rewrite/SKILL.md
@@ -239,12 +239,15 @@ claude-blog/
 │   ├── analyze_blog.py                 # Python quality analysis (5-category scoring)
 │   ├── cognitive_load.py               # Per-section concept-density analyzer (v1.8.0)
 │   ├── discourse_research.py           # Discourse brief synthesis from SERP JSON (v1.8.0)
+│   ├── load_untrusted_root.py          # Code-enforced BRAND/VOICE/DISCOURSE fencing helper (v1.8.3)
+│   ├── lint_prose.py                   # CI prose-hygiene linter (v1.8.4; fence-aware)
 │   └── sync_flow.py                    # FLOW reference sync (stdlib, sandboxed)
-├── tests/                              # pytest test suite (72 tests, 71 pass + 1 graceful skip)
+├── tests/                              # pytest test suite (103+ tests, 0 skips)
 │   ├── conftest.py
 │   ├── test_analyze_blog.py
 │   ├── test_cognitive_load.py          # v1.8.0
 │   ├── test_discourse_research.py      # v1.8.0
+│   ├── test_load_untrusted_root.py     # v1.8.3 (behavioral nonce + sanitize tests)
 │   ├── test_security_guardrails.py
 │   └── test_security_v1_8_0.py         # v1.8.0 (path traversal + DoS + contract regression)
 ├── docs/                               # 6 documentation files

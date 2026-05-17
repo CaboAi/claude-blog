@@ -66,6 +66,8 @@ claude-blog/
 
 - Read `SECURITY.md` for the project's threat model and trust boundaries.
 - Treat any new untrusted-data path (file from user, network response, agent output, project-root file) as crossing a trust boundary. Fence content explicitly (see `agents/blog-researcher.md` for the WebFetch pattern; see `skills/blog/SKILL.md` "Untrusted-Data Contract" section for the project-root pattern).
+- **Project-root file loading (BRAND.md / VOICE.md / DISCOURSE.md and any future additions)**: use `scripts/load_untrusted_root.py` via Bash; do NOT hand-roll a fence in the orchestrator's own token output. The helper generates CSPRNG nonces, scans for instruction-shaped patterns, emits mtime provenance, and refuses symlinks via `O_NOFOLLOW`. Adding a new project-root file means: (a) add its basename to `ALLOWED_BASENAMES` in `scripts/load_untrusted_root.py`, (b) add behavioral tests in `tests/test_load_untrusted_root.py`, (c) document the new T12 surface in `SECURITY.md`. Hand-rolled fences re-introduce the documentation-only state v1.8.3 closed.
+- **Prose hygiene**: `scripts/lint_prose.py` enforces CONTRIBUTING.md prose rules (no em-dashes / en-dashes / ASCII double-hyphen) on every PR via CI. Run locally with `python3 scripts/lint_prose.py` before pushing.
 - Credentials, API keys, tokens: NEVER hardcoded. Use environment variables; store files at mode 0o600 with atomic write (see `skills/blog-google/scripts/google_auth.py` `_harden_perms` pattern).
 - New CLI scripts must enforce size caps (DoS guard) and refuse symlinks (CWE-59) on any path argument.
 

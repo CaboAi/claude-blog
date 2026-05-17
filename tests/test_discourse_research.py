@@ -348,15 +348,16 @@ def test_cluster_cohesion_keeps_two_shared_keywords(tmp_path: Path) -> None:
     inp = tmp_path / "cohesive.json"
     inp.write_text(json.dumps(results), encoding="utf-8")
     brief = _run(inp, "production deployment", fmt="json")
-    # Some cluster of >= 2 items should exist (in new / consensus / niche).
-    total_multi = sum(
-        c["item_count"]
+    # v1.8.4 stronger assertion: at least ONE cluster must have item_count >= 2,
+    # proving cohesion bound the two items together. Old assertion summed
+    # item_counts which was load-bearing but ambiguous to readers.
+    has_multi_cluster = any(
+        c["item_count"] >= 2
         for bucket in ("themes_new", "themes_consensus", "themes_niche")
         for c in brief[bucket]
-        if c["item_count"] >= 2
     )
-    assert total_multi >= 2, (
-        f"genuinely cohesive items did not cluster: {brief}"
+    assert has_multi_cluster, (
+        f"genuinely cohesive items (sharing >=2 keywords) failed to cluster: {brief}"
     )
 
 
