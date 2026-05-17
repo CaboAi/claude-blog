@@ -53,7 +53,7 @@ install.sh and pin a release tag, closing audit VULN-005):
 ```bash
 git clone https://github.com/AgriciDaniel/claude-blog.git
 cd claude-blog
-git checkout v1.8.5          # pin to a release tag (latest as of 2026-05-17)
+git checkout v1.8.6          # pin to a release tag (latest as of 2026-05-17)
 chmod +x install.sh && ./install.sh
 ```
 
@@ -242,7 +242,7 @@ claude-blog/
 │   ├── load_untrusted_root.py          # Code-enforced BRAND/VOICE/DISCOURSE fencing helper (v1.8.3)
 │   ├── lint_prose.py                   # CI prose-hygiene linter (v1.8.4; fence-aware)
 │   └── sync_flow.py                    # FLOW reference sync (stdlib, sandboxed)
-├── tests/                              # pytest test suite (103+ tests, 0 skips)
+├── tests/                              # pytest test suite (130+ tests, 0 skips)
 │   ├── conftest.py
 │   ├── test_analyze_blog.py
 │   ├── test_cognitive_load.py          # v1.8.0
@@ -270,7 +270,7 @@ claude-blog/
 
 ### Quality Gates (CI-enforced on every PR)
 
-1. **pytest**: 124+ tests across security, behavioral, and regression suites
+1. **pytest**: 130+ tests across security, behavioral, and regression suites
 2. **Plugin validation**: `claude plugin validate .` (when CLI available) + hand-rolled JSON/regex checks
 3. **Stale-path lint**: catches drift in `references/` and `templates/` cross-references
 4. **Prose hygiene**: `scripts/lint_prose.py` (fence-aware, backtick-aware) enforces CONTRIBUTING.md no-em-dash / no-en-dash / no-` -- ` rule

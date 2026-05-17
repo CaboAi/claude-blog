@@ -147,31 +147,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.0 (SHA-pinned)
-      - name: Compare version surfaces
-        run: |
-          python3 - <<'PY'
-          import json, re, sys
-          from pathlib import Path
-
-          versions = {}
-          m = re.search(r'^version\s*=\s*"([^"]+)"',
-                        Path('pyproject.toml').read_text(), re.MULTILINE)
-          versions['pyproject.toml'] = m.group(1) if m else None
-          with open('.claude-plugin/plugin.json') as f:
-              versions['plugin.json'] = json.load(f).get('version')
-          m = re.search(r'^version:\s*(\S+)',
-                        Path('CITATION.cff').read_text(), re.MULTILINE)
-          versions['CITATION.cff'] = m.group(1) if m else None
-          skill = Path('skills/blog/SKILL.md').read_text()
-          m = re.search(r'^\s*version:\s*"?([^"\s]+)"?', skill, re.MULTILINE)
-          versions['skills/blog/SKILL.md'] = m.group(1) if m else None
-
-          print("Version surfaces:")
-          for k, v in versions.items():
-              print(f"  {k}: {v!r}")
-          unique = set(versions.values())
-          if len(unique) > 1:
-              print(f"\nERROR: version surfaces disagree: {unique}")
-              sys.exit(1)
-          print(f"\nAll version surfaces aligned at {unique.pop()!r}")
-          PY
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: pip install pytest
+      - name: Run version-coherence pytest (canonical source v1.8.6+)
+        # Replaces the prior heredoc duplicate. tests/test_version_coherence.py
+        # is now the single source of truth; local devs and CI run the same
+        # assertion logic. Closes 7TH-AUDIT-012.
+        run: python -m pytest tests/test_version_coherence.py -v

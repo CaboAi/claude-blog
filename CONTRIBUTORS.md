@@ -2,6 +2,19 @@
 
 Claude Blog is built by [@AgriciDaniel](https://github.com/AgriciDaniel) with contributions from the AI Marketing Hub community.
 
+## v1.8.1 through v1.8.6: Hostile-audit hardening (2026-05-17)
+
+Seven rounds of hostile re-audit (cybersecurity + GitHub + documentation + code-quality + test-coverage tracks) caught defects each round that prior rounds missed. Each round was executed by parallel review passes with file:line evidence requirements. The audit pattern itself is documented across `CHANGELOG.md` v1.8.1 through v1.8.6 entries.
+
+- **v1.8.1**: closed 27 findings from a three-track audit (catastrophic `parse_engagement` regex bug, indirect prompt injection on project-root auto-load, path-traversal hardening, NOTICE attribution).
+- **v1.8.2**: per-load nonce contract + project-wide ASCII em-dash cleanup (script-driven, missed unicode em-dashes).
+- **v1.8.3**: code-CAPABLE nonce defense via `scripts/load_untrusted_root.py` + 6 HIGH prose breakages + O(n^2) DoS close.
+- **v1.8.4**: CI prose-hygiene linter (`scripts/lint_prose.py`) + version-coherence check + 30 unicode em-dashes cleaned (the v1.8.2/v1.8.3 cleanup missed unicode).
+- **v1.8.5**: CLAUDE.md / ARCHITECTURE.md updates + `tests/test_lint_prose.py` + OUTERMOST nonce-authority instruction + command-coherence regression test.
+- **v1.8.6**: installer-sync fix (the v1.8.0+ helpers were never copied by install.sh) + 10 stale sub-skill SKILL.md versions resolved + sub-skill coherence test + 4-backtick fence handling + YAML-quote-tolerant version regex.
+
+Calibrated score arc: 68/100 (v1.8.0) -> ~91/100 plateau (v1.8.5) -> ~96/100 (v1.8.6 ceiling per /best-practices kernel; 100/100 is structurally unreachable per the asymptote analysis in CHANGELOG v1.8.5).
+
 ## v1.8.0: Methodology adaptation from impeccable (2026-05-16)
 
 Four editorial methodologies in v1.8.0 are adapted from the [impeccable](https://github.com/pbakaus/impeccable) frontend-design plugin (v3.1.1, Apache 2.0, by [Paul Bakaus](https://github.com/pbakaus)).

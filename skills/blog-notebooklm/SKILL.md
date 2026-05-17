@@ -14,7 +14,7 @@ argument-hint: "[ask|discover|library|setup|status|cleanup] [question-or-url]"
 license: MIT
 metadata:
   author: AgriciDaniel
-  version: "1.0.0"
+  version: "1.8.6"
   source: "https://github.com/PleasePrompto/notebooklm-skill"
 ---
 

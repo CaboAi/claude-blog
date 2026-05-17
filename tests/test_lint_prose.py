@@ -273,6 +273,32 @@ def test_nested_fence_delimiters_tracked_independently(tmp_path: Path):
     assert violations[0][0] == 8
 
 
+def test_four_backtick_fence_preserves_inner_three_backticks(tmp_path: Path):
+    """7TH-AUDIT-013 regression: per CommonMark, a 4-backtick fence is
+    closed only by 4+ backticks. An inner 3-backtick line is content,
+    not a fence boundary. v1.8.5 used `startswith("```")` which matched
+    both 3 and 4 backticks; nested fence inside ```` was closed
+    prematurely, exposing em-dashes."""
+    mod = _import_linter()
+    f = tmp_path / "doc.md"
+    f.write_text(
+        "````\n"
+        "outer 4-backtick fence — em-dash hidden\n"
+        "```\n"
+        "inner 3-backtick content — also hidden (still inside outer)\n"
+        "```\n"
+        "still inside outer — hidden\n"
+        "````\n"
+        "Now outside; em-dash flagged: —\n",
+        encoding="utf-8",
+    )
+    violations = mod.lint_file(f)
+    assert len(violations) == 1, (
+        f"4-backtick fence regression: expected 1 violation, got {violations}"
+    )
+    assert violations[0][0] == 8
+
+
 def test_unclosed_fence_at_eof_does_not_crash(tmp_path: Path):
     """A markdown file with an unclosed code fence at EOF should not
     raise; the linter should treat the unclosed fence's content as

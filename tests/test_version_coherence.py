@@ -34,8 +34,9 @@ def _read_plugin_version() -> str | None:
 
 
 def _read_citation_version() -> str | None:
+    """Strip optional YAML single/double quotes (v1.8.6: 7TH-AUDIT-011)."""
     text = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
-    m = re.search(r"^version:\s*(\S+)", text, re.MULTILINE)
+    m = re.search(r'^version:\s*[\'"]?([0-9][^\'"\s]+)[\'"]?', text, re.MULTILINE)
     return m.group(1) if m else None
 
 
@@ -75,6 +76,40 @@ def test_version_string_matches_semver_pattern() -> None:
     assert version is not None
     assert re.match(r"^\d+\.\d+\.\d+(-\S+)?$", version), (
         f"version {version!r} does not match semver pattern X.Y.Z[-pre]"
+    )
+
+
+def test_all_sub_skill_versions_match_project_version() -> None:
+    """v1.8.6 (7TH-AUDIT-003): every skills/*/SKILL.md `version:` field
+    must equal the project version. Pre-v1.8.6, 10 sub-skill SKILL.md
+    files had stale per-skill versions (1.0.0, 1.4.0, 1.7.0) that were
+    never bumped through the v1.8.x cycle. The version-coherence test
+    only covered the orchestrator, missing all 10 sub-skill surfaces.
+    """
+    target = _read_pyproject_version()
+    assert target is not None
+    skill_md_files = sorted((ROOT / "skills").glob("*/SKILL.md"))
+    assert len(skill_md_files) >= 30, (
+        f"unexpectedly few SKILL.md files: {len(skill_md_files)}"
+    )
+    mismatches = []
+    for f in skill_md_files:
+        text = f.read_text(encoding="utf-8")
+        # Match the YAML frontmatter version field; tolerate quote styles.
+        m = re.search(
+            r'^\s+version:\s*[\'"]?([0-9][^\'"\s]+)[\'"]?',
+            text, re.MULTILINE,
+        )
+        if m is None:
+            # Some SKILL.md files may not declare metadata.version at all;
+            # that is acceptable. We only flag drift, not absence.
+            continue
+        if m.group(1) != target:
+            mismatches.append((f.relative_to(ROOT), m.group(1)))
+    assert not mismatches, (
+        f"sub-skill SKILL.md versions disagree with pyproject.toml "
+        f"({target}):\n"
+        + "\n".join(f"  {p}: {v}" for p, v in mismatches)
     )
 
 

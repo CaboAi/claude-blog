@@ -77,7 +77,12 @@ def lint_file(path: Path) -> list[tuple[int, str, str, str]]:
     except (UnicodeDecodeError, OSError):
         return []
     violations: list[tuple[int, str, str, str]] = []
-    fence_delim: str | None = None  # None when outside any fence
+    # fence_open is the OPENING delimiter string (e.g. "```", "````", "~~~").
+    # Per CommonMark, the closing fence must consist of >= the same number of
+    # the same character. v1.8.6 (7TH-AUDIT-013) fix: track the full opening
+    # string, not just the type, so a 4-backtick fence is closed only by
+    # 4+ backticks; an inner ``` line does not close the outer ````.
+    fence_open: str | None = None
     in_frontmatter = False
     for i, line in enumerate(text.splitlines(), 1):
         if i == 1 and line.strip() == "---":
@@ -88,17 +93,18 @@ def lint_file(path: Path) -> list[tuple[int, str, str, str]]:
                 in_frontmatter = False
             continue
         stripped = line.lstrip()
-        if fence_delim is None:
-            if stripped.startswith("```"):
-                fence_delim = "```"
-                continue
-            if stripped.startswith("~~~"):
-                fence_delim = "~~~"
+        if fence_open is None:
+            m = re.match(r"(`{3,}|~{3,})", stripped)
+            if m is not None:
+                fence_open = m.group(1)
                 continue
         else:
-            # Inside a fence; only the matching delimiter closes it.
-            if stripped.startswith(fence_delim):
-                fence_delim = None
+            # Closing fence: same char, length >= opening.
+            m = re.match(r"(`{3,}|~{3,})", stripped)
+            if (m is not None
+                    and m.group(1)[0] == fence_open[0]
+                    and len(m.group(1)) >= len(fence_open)):
+                fence_open = None
             continue  # all lines inside a fence are skipped
         for char, name in _find_violations_in_line(line):
             violations.append((i, char, name, line.rstrip()))
