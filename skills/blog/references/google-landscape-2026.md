@@ -1,4 +1,4 @@
-# SEO Landscape 2026 -- Google Updates & E-E-A-T
+# SEO Landscape 2026: Google Updates & E-E-A-T
 
 ## December 2025 Core Update
 
@@ -27,7 +27,7 @@ John Mueller has stated in multiple Google Office Hours sessions that Google's s
 evaluate content quality regardless of origin. AI as a research tool is fine; AI as sole
 content creator without human expertise and oversight is not.
 
-### Post-Update Analysis -- Winners & Losers
+### Post-Update Analysis: Winners & Losers
 
 Post-December 2025 core update visibility shifts:
 - Sites with original testing, case studies, and first-hand experience gained visibility

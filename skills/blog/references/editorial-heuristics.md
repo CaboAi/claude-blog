@@ -1,87 +1,59 @@
 # Editorial Heuristics: Ordinal Scoring Rubric (0 to 4)
 
-The existing 100-point system in `quality-scoring.md` (sibling file in this directory) tells you a post scores 78. This ordinal rubric tells you **which sections are P0 blockers and which are P3 polish**. They are complementary, not competing; run both when an editorial review needs to be actionable.
+The 100-point system in `quality-scoring.md` (sibling file) tells you a post scores 78. This ordinal rubric tells you **which sections are P0 blockers and which are P3 polish**. Complementary, not competing; run both for actionable review.
 
-Adapted from Nielsen's 10 Usability Heuristics as applied in the impeccable plugin (Paul Bakaus, Apache 2.0). The original scores UI quality; this version scores editorial quality.
+Adapted from Nielsen's 10 Usability Heuristics via the impeccable plugin (Paul Bakaus, Apache 2.0). Original scores UI; this version scores editorial.
 
----
+## Scoring scale + severity tags
 
-## How to score
+| Score | Meaning | Severity tag | When to assign |
+|---|---|---|---|
+| 0 | Absent or actively wrong | P0 (blocking) | Fabricated stat, broken structure, plagiarism risk |
+| 1 | Major gaps; most checks fail | P1 (ship-blocker) | Missing source on load-bearing claim, AI-detection signal |
+| 2 | Mixed; important checks fail | P2 (publish then iterate) | Weak heading, missing schema, suboptimal opener |
+| 3 | Good; minor gaps | P3 (nice to have) | Cosmetic, marginal SEO, stylistic preference |
+| 4 | Genuinely excellent (rare) | (none) | "Would cite in a meta-review of best-practice blog craft" |
 
-Each heuristic gets one of five scores:
+A 0 or 1 on any heuristic generates at least one P0 or P1. Most strong production posts land 2 to 3 across the board.
 
-| Score | Meaning |
-|---|---|
-| 0 | Absent or actively wrong |
-| 1 | Major gaps; most checks fail |
-| 2 | Mixed; some checks pass, important ones do not |
-| 3 | Good; most checks pass with minor gaps |
-| 4 | Genuinely excellent. A 4 is rare. |
-
-Be honest. A 4 means "would cite this in a meta-review of best-practice blog craft," not "good enough to ship." Most strong production posts land between 2 and 3 across the board.
-
-Each finding gets a severity tag:
-
-| Tag | Meaning | When to use |
-|---|---|---|
-| P0 | Blocking. Do not publish. | Fabricated stat, broken structure, plagiarism risk, factually wrong |
-| P1 | Ship-blocking polish. Fix before publish. | Missing source on a load-bearing claim, broken citation, AI-detection signal |
-| P2 | Should fix soon. Publish then iterate. | Weak heading, missing schema, suboptimal answer-first opener |
-| P3 | Nice to have. | Cosmetic, marginal SEO gain, stylistic preference |
-
-A 0 or 1 on any heuristic should generate at least one P0 or P1.
-
----
-
-## Mapping to Nielsen's original heuristics
-
-For readers familiar with Nielsen's UI heuristics, here is the translation:
+## Nielsen mapping
 
 | Nielsen original (UI) | Editorial adaptation |
 |---|---|
 | 1. Visibility of system status | 1. Visibility of intent |
-| 2. Match between system and the real world | 2. Match between heading and section content |
+| 2. Match between system and real world | 2. Heading and section content match |
 | 3. User control and freedom | 3. Reader control and exit |
-| 4. Consistency and standards | 4. Consistency of voice and standards |
+| 4. Consistency and standards | 4. Voice and standards consistency |
 | 5. Error prevention | 5. Fabricated-stat prevention |
 | 6. Recognition rather than recall | 6. Recognition over recall |
-| 7. Flexibility and efficiency of use | 7. Flexibility for skimmer vs deep reader |
-| 8. Aesthetic and minimalist design | 8. Aesthetic and information-density discipline |
-| 9. Help users recognize, diagnose, and recover from errors | 9. Failure-recovery copy |
-| 10. Help and documentation | 10. Help, sources, and related documentation |
+| 7. Flexibility and efficiency of use | 7. Skimmer vs deep-reader flexibility |
+| 8. Aesthetic and minimalist design | 8. Information-density discipline |
+| 9. Help recognize, diagnose, recover | 9. Failure-recovery copy |
+| 10. Help and documentation | 10. Sources and related documentation |
 
-Nielsen reference: Jakob Nielsen, "10 Usability Heuristics for User Interface Design," Nielsen Norman Group, 1994 (revised 2020). https://www.nngroup.com/articles/ten-usability-heuristics/
+Nielsen reference: Jakob Nielsen, "10 Usability Heuristics for User Interface Design," NN/g, 1994 (revised 2020). https://www.nngroup.com/articles/ten-usability-heuristics/
 
 ## The 10 Editorial Heuristics
 
-### 1. Visibility of intent (the post tells the reader what it is)
+### 1. Visibility of intent
 
-Adapted from Nielsen's "Visibility of system status." The reader should know within 5 seconds what the post is, what they will learn, and roughly how long it takes.
+Reader knows within 5 seconds what the post is, what they will learn, and roughly how long it takes.
 
-**Check for**:
-- Title accurately reflects body content (no clickbait drift)
-- Description / meta description previews real substance
-- Summary box ("Key Takeaways" / "TL;DR") at the top with 3 to 5 bullets
-- Estimated reading time or word count visible
-- H1 matches title (within reason)
+**Check for**: title reflects body (no clickbait drift); meta description previews substance; "Key Takeaways" or TL;DR box (3 to 5 bullets) at top; reading time / word count visible; H1 matches title.
 
 | Score | Criteria |
 |---|---|
-| 0 | Title misleading or absent; no summary; reader has to infer the topic |
+| 0 | Title misleading or absent; no summary; reader infers topic |
 | 1 | Title present; nothing else orients the reader |
 | 2 | Title and meta present; no summary box |
-| 3 | Summary present but generic or low-information |
+| 3 | Summary present but generic |
 | 4 | Title, meta, and summary all reinforce a specific promise the body keeps |
 
-### 2. Match between heading and section content
+### 2. Heading and section content match
 
-Adapted from "Match between system and real world." A heading is a contract; the section under it should deliver what the heading promises, in the order the reader expects.
+A heading is a contract; the section must deliver in the order the reader expects.
 
-**Check for**:
-- Each H2 promise is fulfilled in the first 100 words of that section
-- No bait-and-switch (heading says "compare X and Y," body only discusses X)
-- Information order matches the cognitive sequence (problem then solution, not solution then problem)
-- Domain terms used as the audience uses them (not the model's preferred synonym)
+**Check for**: each H2 promise fulfilled in the first 100 words of that section; no bait-and-switch; problem-then-solution order; domain terms used as the audience uses them.
 
 | Score | Criteria |
 |---|---|
@@ -93,13 +65,9 @@ Adapted from "Match between system and real world." A heading is a contract; the
 
 ### 3. Reader control and exit
 
-Adapted from "User control and freedom." Long-form prose can trap the reader. Good blogs let them scan, jump, and bail without losing the thread.
+Long-form prose can trap the reader. Good blogs let them scan, jump, and bail without losing the thread.
 
-**Check for**:
-- Table of contents present for posts over 1,500 words
-- Internal jump links between sections
-- Each H2 self-contained enough to read independently (passage-level citability)
-- Clear "what next" at the end (related posts, downstream action)
+**Check for**: TOC on posts over 1,500 words; internal jump links; H2s self-contained (passage-level citability); clear "what next" at end.
 
 | Score | Criteria |
 |---|---|
@@ -107,18 +75,13 @@ Adapted from "User control and freedom." Long-form prose can trap the reader. Go
 | 1 | Sections exist but readers cannot skim |
 | 2 | Navigation partial; some sections require previous context |
 | 3 | TOC present, most sections standalone |
-| 4 | Skim-readable end to end with self-contained sections, clear exits, downstream paths |
+| 4 | Skim-readable end to end; self-contained sections; clear exits; downstream paths |
 
-### 4. Consistency of voice and standards
+### 4. Voice and standards consistency
 
-Adapted from "Consistency and standards." Within a post, terminology, tone, formatting, and structural patterns should not drift.
+Within a post, terminology, tone, formatting, and structural patterns must not drift.
 
-**Check for**:
-- Same term used for the same concept throughout (not "AI" then "LLM" then "model" then "system" arbitrarily)
-- Sentence cadence stable (no jarring switches between conversational and academic)
-- Bullet vs prose decision applied consistently in similar sections
-- Citation format identical across all references
-- Heading capitalization style consistent
+**Check for**: same term for same concept throughout (not "AI" then "LLM" then "model" arbitrarily); stable cadence; bullet vs prose decision applied consistently; citation format identical; heading capitalization consistent.
 
 | Score | Criteria |
 |---|---|
@@ -130,14 +93,9 @@ Adapted from "Consistency and standards." Within a post, terminology, tone, form
 
 ### 5. Fabricated-stat prevention
 
-Adapted from "Error prevention." Better than caught-after-the-fact retractions is structure that prevents fabricated or unsourced data from entering the draft.
+Structure that prevents fabricated or unsourced data from entering the draft.
 
-**Check for**:
-- Every numeric claim has a named source within the same paragraph
-- Every source URL is reachable (tier 1 to 3)
-- Year anchor in prose for time-sensitive claims (FLOW evidence triple)
-- Retrieval date on the source citation
-- No vague "studies show" or "experts agree" without naming who
+**Check for**: every numeric claim has a named source in the same paragraph; every source URL reachable (tier 1 to 3); year anchor in prose for time-sensitive claims (FLOW evidence triple); retrieval date on citation; no vague "studies show" without naming who.
 
 | Score | Criteria |
 |---|---|
@@ -147,16 +105,11 @@ Adapted from "Error prevention." Better than caught-after-the-fact retractions i
 | 3 | All sourced; minor gaps in retrieval dates |
 | 4 | Full FLOW evidence triple on every statistic |
 
-### 6. Recognition over recall (the reader does not memorize)
+### 6. Recognition over recall
 
-Adapted from "Recognition rather than recall." The reader should not have to remember what was said three sections ago to follow the current paragraph.
+Reader should not have to remember what was said three sections ago to follow the current paragraph.
 
-**Check for**:
-- Key terms redefined or aliased on reuse if introduced more than 500 words earlier
-- Comparison tables for X-vs-Y content (not buried prose)
-- Visual aids (charts, images) where data is dense
-- Repeated context cues rather than implicit reference
-- Numbered steps numbered in body, not just lists
+**Check for**: key terms redefined or aliased on reuse if introduced more than 500 words earlier; comparison tables for X-vs-Y (not buried prose); visual aids where data is dense; repeated context cues; numbered steps numbered in body.
 
 | Score | Criteria |
 |---|---|
@@ -166,113 +119,83 @@ Adapted from "Recognition rather than recall." The reader should not have to rem
 | 3 | Mostly recognition-friendly |
 | 4 | Every section can be entered cold |
 
-### 7. Flexibility for skimmer vs deep reader
+### 7. Skimmer vs deep-reader flexibility
 
-Adapted from "Flexibility and efficiency of use." The post should reward both modes: the executive who scans bullets and headings, and the practitioner who reads end to end.
+The post should reward both modes: executive who scans, practitioner who reads end to end.
 
-**Check for**:
-- Bold lead-ins on key points for skimmability
-- Pull quotes or call-out boxes for high-leverage claims
-- Each H2 opener is a 40 to 60 word answer-first paragraph
-- Lists used where lists are right; prose where prose is right
-- FAQ section for jump-look answers
+**Check for**: bold lead-ins on key points; pull quotes for high-leverage claims; each H2 opener is a 40 to 60 word answer-first paragraph; lists where lists are right, prose where prose is right; FAQ section.
 
 | Score | Criteria |
 |---|---|
-| 0 | Only readable end-to-end; no skim affordances at all |
+| 0 | Only readable end-to-end; no skim affordances |
 | 1 | Some headings, but no bold lead-ins, pull quotes, or answer-first openers |
 | 2 | Skim affordances in some sections; missing FAQ or answer-first opener |
 | 3 | Most sections have skim affordances; one of (answer-first opener, FAQ, pull quotes) missing |
-| 4 | Rewards skimmer and deep reader equally: bold lead-ins, answer-first openers on every H2, FAQ, pull quotes where leverage exists |
+| 4 | Rewards both modes equally: bold lead-ins, answer-first openers on every H2, FAQ, pull quotes |
 
-### 8. Aesthetic and information-density discipline
+### 8. Information-density discipline
 
-Adapted from "Aesthetic and minimalist design." Long does not equal valuable. Every paragraph should earn its place; padding is a slop signal.
+Long does not equal valuable. Every paragraph should earn its place; padding is a slop signal.
 
-**Check for**:
-- No paragraph over 150 words
-- No introduction that delays the first substantive claim by more than 150 words
-- No SEO-padded conclusion ("In summary, we have covered...")
-- No filler transitions ("Now, let's discuss...")
-- Word count appropriate to topic (1,500 word listicle topic should not be 3,500 words)
+**Check for**: no paragraph over 150 words; no intro delaying the first substantive claim by more than 150 words; no SEO-padded conclusion; no filler transitions ("Now, let's discuss..."); word count appropriate to topic.
 
 | Score | Criteria |
 |---|---|
 | 0 | Padding pervasive; intro buries the lede; conclusion restates the post |
 | 1 | Several paragraphs over 150 words; multiple filler transitions |
-| 2 | One bloat axis present (e.g. SEO-padded conclusion, or long intro, or word-count drift) |
+| 2 | One bloat axis present (e.g. SEO-padded conclusion or long intro) |
 | 3 | Minor bloat (1 to 2 long paragraphs or one filler transition); otherwise tight |
-| 4 | Every paragraph earns its place; no padding; word count matches topic scope |
+| 4 | Every paragraph earns its place; word count matches topic scope |
 
-### 9. Failure-recovery copy (broken paths fail gracefully)
+### 9. Failure-recovery copy
 
-Adapted from "Help users recognize, diagnose, and recover from errors." The post must handle reader confusion or partial knowledge.
+Post must handle reader confusion or partial knowledge.
 
-**Check for**:
-- Glossary or inline definitions for jargon
-- "If you are new to X, read this first" links
-- Clearly marked "for advanced readers" sections if they exist
-- Examples for every abstract concept
-- Acknowledgement of when a technique does not apply
+**Check for**: glossary or inline definitions for jargon; "If you are new to X, read this first" links; clearly marked "for advanced readers" sections if they exist; examples for every abstract concept; acknowledgement of when a technique does not apply.
 
 | Score | Criteria |
 |---|---|
 | 0 | Newcomers will bounce; no definitions; abstract claims without examples |
 | 1 | Jargon undefined in most cases; few examples |
-| 2 | Some jargon defined; examples present for half of abstract claims |
+| 2 | Some jargon defined; examples for half of abstract claims |
 | 3 | Most jargon defined or aliased; examples for most abstract concepts |
-| 4 | Graceful for every audience tier: glossary or inline definitions, examples for every abstract concept, audience-tier signposts, scope-of-applicability notes |
+| 4 | Graceful for every audience tier: definitions, examples, signposts, scope notes |
 
-### 10. Help, sources, and related documentation
+### 10. Sources and related documentation
 
-Adapted from "Help and documentation." Even the best post is one node in a knowledge graph.
+Even the best post is one node in a knowledge graph.
 
-**Check for**:
-- 3 to 10 contextual internal links to related posts
-- 3 to 8 outbound links to tier 1 to 3 sources
-- Author bio with credentials and contact path
-- Last-updated date visible
-- Related-reads section at the end
+**Check for**: 3 to 10 contextual internal links; 3 to 8 outbound tier 1 to 3 sources; author bio with credentials; last-updated date visible; related-reads section at end.
 
 | Score | Criteria |
 |---|---|
 | 0 | Isolated content; zero internal links; no author bio; no outbound sources |
 | 1 | One or two internal links; author bio thin; few sources |
-| 2 | Some links and a basic bio, but missing related-reads or last-updated date |
-| 3 | Most signals present; minor gap (e.g. only 2 internal links, or related-reads but no last-updated date) |
-| 4 | Fully embedded in a content graph: 3+ internal links, 3+ outbound tier 1 to 3 sources, full author bio, last-updated date, related-reads section |
-
----
+| 2 | Some links and basic bio; missing related-reads or last-updated date |
+| 3 | Most signals present; minor gap |
+| 4 | Fully embedded in content graph: 3+ internal, 3+ outbound, full bio, dates, related-reads |
 
 ## Reporting format
 
 ```
 ## Editorial Heuristics Report: [Title]
 
-| # | Heuristic | Score | Severity of gap | Note |
+| # | Heuristic | Score | Severity | Note |
 |---|---|---|---|---|
 | 1 | Visibility of intent | 3 | P2 | Summary box generic; tighten the promise |
 | 2 | Heading-content match | 4 | (none) | Every H2 fulfills in opener |
 | 3 | Reader control | 2 | P1 | No TOC on 2,400-word post |
-| 4 | Voice consistency | 3 | P3 | One paragraph shifts to academic |
-| 5 | Fabricated-stat prevention | 4 | (none) | All sources verified, FLOW triple present |
-| 6 | Recognition over recall | 2 | P2 | "Type-Token Ratio" used 4 times without aliasing |
-| 7 | Skim vs deep flexibility | 3 | P3 | Bold lead-ins missing from 3 sections |
-| 8 | Aesthetic discipline | 4 | (none) | No padding |
-| 9 | Failure-recovery copy | 2 | P1 | Jargon introduced without definitions in 3 places |
-| 10 | Help and sources | 3 | P3 | Only 2 internal links |
+| ... | ... | ... | ... | ... |
 
 ### Prioritized fixes
 - **P0**: (none)
 - **P1**: Add TOC; define jargon (3 spots)
-- **P2**: Tighten summary box; alias "TTR" on reuse
-- **P3**: Add bold lead-ins; add 2 more internal links; smooth voice shift in paragraph 12
+- **P2**: Tighten summary; alias "TTR" on reuse
+- **P3**: Add bold lead-ins; smooth voice shift in paragraph 12
 ```
 
-The ordinal score is independent of the 100-point system. Both can run on the same post; cross-checking them surfaces inconsistencies (e.g. a 78/100 with three P0s means the 100-point system is missing a load-bearing failure mode).
-
----
+Ordinal score is independent of the 100-point system. Both can run on the same post; cross-checking surfaces inconsistencies (a 78/100 with three P0s means the 100-point system is missing a load-bearing failure mode).
 
 ## Attribution
 
-This rubric adapts Nielsen's 10 Usability Heuristics (Jakob Nielsen, NN/g, 1994 revised 2020) via the impeccable plugin's `heuristics-scoring.md` (Paul Bakaus, Apache 2.0, https://github.com/pbakaus/impeccable). The 0 to 4 ordinal scale, P0 to P3 severity model, and per-dimension scoring tables come from the impeccable adaptation. The 10 heuristics are translated from UI ergonomics to editorial ergonomics; see the Nielsen-mapping table at the top of this file for the one-to-one correspondence.
+Adapts Nielsen's 10 Usability Heuristics (Jakob Nielsen, NN/g, 1994 revised 2020) via the impeccable plugin's `heuristics-scoring.md` (Paul Bakaus, Apache 2.0, https://github.com/pbakaus/impeccable). The 0 to 4 ordinal scale, P0 to P3 severity, and per-dimension tables come from the impeccable adaptation. The 10 heuristics are translated from UI ergonomics to editorial ergonomics; see the Nielsen-mapping table above.

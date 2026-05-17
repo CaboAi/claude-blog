@@ -7,6 +7,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-05-17
+
+Same-day follow-up to v1.8.1. Addresses the five caveats the v1.8.1 final
+report flagged as residuals plus deferred medium-severity findings. The
+biggest single change is a project-wide ` -- ` (ASCII double-hyphen)
+cleanup across 43 markdown files (339 prose replacements + 41 template-fence
+replacements) so generated content never carries the strongest AI-tell
+character pattern. No functional changes; security, correctness, and prose
+hygiene only.
+
+### Security
+
+- **Per-load random fence nonces (closes v1.8.1 residual caveat)**: the
+  Untrusted-Data Contract in `skills/blog/SKILL.md` now requires a fresh
+  128-bit hex nonce (via `secrets.token_hex(16)` or equivalent) embedded
+  in the BEGIN/END fence markers for every project-root file load. An
+  attacker who controls BRAND.md / VOICE.md / DISCOURSE.md cannot
+  pre-embed a counterfeit terminator because they cannot predict the
+  nonce. `=== BEGIN UNTRUSTED ... [nonce: <hex>] ===` is the new format.
+  The defense stacks with sanitize + tool-boundary preservation, giving
+  four independent failure modes the attacker must defeat simultaneously.
+- **SECURITY.md T12 section**: T12 mitigation section #1 ("Fenced
+  injection") updated to "Fenced injection with per-load nonce" and the
+  nonce-generation API (`secrets.token_hex(16)`) is now specified.
+- **tests/test_security_v1_8_0.py: orchestrator-contract test
+  strengthened**: now also asserts that the Untrusted-Data Contract
+  references `nonce` and `secrets.token_hex` to prevent a future edit
+  from silently rolling back to static fences.
+
+### Correctness
+
+- **scripts/cognitive_load.py: weighted clause-marker scoring (FIND-013)**.
+  Previous version counted enumeration commas ("red, white, and blue")
+  the same as true subordinator words ("which," "that," "because"),
+  inflating clause-depth scores on prose with normal lists. Split markers
+  into two pools with explicit weights: PUNCTUATION_WEIGHT=0.3 (commas,
+  semicolons, parens) and SUBORDINATOR_WEIGHT=1.0 (which, that, who,
+  whose, although, though, unless, whereas, because, since, while, when,
+  where, if, until, before, after). Average per sentence with weighted
+  sum.
+- **scripts/cognitive_load.py: extended common-opener filter (FIND-015)**.
+  `_COMMON_OPENERS` now covers month abbreviations (Jan/Feb/Mar/...),
+  weekday abbreviations (Mon/Tue/Wed/...), modals (Can/Could/Should/...),
+  prepositions used at sentence start (From/To/By/At/In/On/Over/Under/
+  Through/Across/Around/Between/Among), and imperative-mood openers used
+  in how-to prose (Let/Take/Use/Make/Run/Try/See/Note/Add/Consider/
+  Imagine/Suppose). This reduces false-positive entity counts in
+  tutorial-style content where sentences regularly start with imperative
+  Title-Case words.
+- **scripts/discourse_research.py: multi-keyword cluster cohesion
+  (FIND-017)**. The greedy single-keyword cluster assignment in v1.8.1
+  could co-locate items that shared only one peripheral keyword. New
+  `_filter_cohesive` helper keeps an item in a multi-item cluster only if
+  it shares at least one ADDITIONAL keyword with another item already in
+  the cluster (the primary keyword is excluded from the shared count
+  since every item has it by construction). Singleton clusters are
+  preserved so isolated themes still surface in the niche bucket.
+- **scripts/discourse_research.py: render_markdown decomposed
+  (FIND-021)**. The 70-line monolith is now five small helpers:
+  `_render_header`, `_render_decomposition`, `_render_cluster_section`
+  (parameterized for new/consensus/niche), `_render_specifics`, and the
+  thin `render_markdown` orchestrator that composes them. Future format
+  tweaks no longer require touching a 70-line block.
+
+### Documentation
+
+- **Project-wide ` -- ` (ASCII double-hyphen) prose cleanup**. Two
+  intelligent scripts (`/tmp/em_dash_cleanup.py` + `/tmp/em_dash_fence_cleanup.py`)
+  processed 43 markdown files in skills/, agents/, and docs/, replacing
+  339 prose violations and 41 template-fence violations with `:` or other
+  appropriate punctuation. Code fences for bash/python/json/yaml were
+  preserved (CLI flags like `--input` legitimately use `--`). The five
+  remaining ` -- ` instances are all inside `bash` code fences (CLI
+  comments and continuation) or inside backticks documenting the
+  forbidden character itself (pedagogical use per CONTRIBUTING.md
+  exception).
+- **editorial-heuristics.md compressed from 278 to 201 lines** (within
+  the 200-line guideline for new references). The compression merged the
+  separate "How to score" and "Severity" tables, tightened heuristic
+  descriptions, and condensed the Nielsen-mapping table. All 10 score
+  tables and the Nielsen mapping are preserved; only prose redundancy
+  was removed.
+- **DOC-006**: `skills/blog/references/research-quality.md` section 2
+  renamed from "Topic pre-flight" to "Step 0.45: Topic pre-flight" for
+  symmetry with the agent's labeled Step 0.45 reference.
+- **DOC-007**: `skills/blog-rewrite/SKILL.md` and
+  `skills/blog-brief/SKILL.md` reference paths converted from ambiguous
+  `references/research-quality.md` (no local references/ dir) to
+  unambiguous `skills/blog/references/research-quality.md`.
+- **DOC-008**: `skills/blog-strategy/SKILL.md` reference paths
+  standardized from three styles (`../blog/references/`,
+  `skills/blog/references/`, plain `references/`) to one
+  (`skills/blog/references/`).
+- **DOC-015**: `skills/blog-discourse/SKILL.md` description expanded
+  with three additional triggers ("discourse research", "research what
+  people are saying", "real-time research", "practitioner discourse").
+- **DOC-016**: `skills/blog/references/cognitive-load.md` documents the
+  `--jargon` flag and explains that entries augment the defaults.
+
+### Tests
+
+- **78 tests pass + 0 skips** (same as v1.8.1; new contract guards added
+  for the nonce contract).
+
+### Acknowledgments
+
+This release closes the residuals the v1.8.1 final report acknowledged as
+known limitations. The fence-injection caveat motivated the per-load
+nonce hardening. The em-dash project-wide caveat motivated the two-pass
+intelligent cleanup. The remaining "TOCTOU on Windows" caveat is
+environmental and cannot be closed without dropping Windows support.
+
 ## [1.8.1] - 2026-05-17
 
 A post-v1.8.0 hostile-review hardening pass. The v1.8.0 commit landed locally on

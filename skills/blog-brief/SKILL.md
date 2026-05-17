@@ -14,17 +14,17 @@ argument-hint: "<topic>"
 license: MIT
 ---
 
-# Blog Brief Generator -- Content Planning
+# Blog Brief Generator: Content Planning
 
 Generates comprehensive content briefs that guide blog writing for maximum
 impact on both Google rankings and AI citation platforms.
 
 Reference documents:
-- `references/content-templates.md` -- template selection criteria
-- `references/distribution-playbook.md` -- channel-specific distribution tactics
-- `references/internal-linking.md` -- link architecture patterns
-- `references/research-quality.md` -- 5-dim quality rubric + pre-flight trap classes + freshness floors (v1.8.0)
-- `references/synthesis-contract.md` -- 6 LAWs for synthesis output (v1.8.0)
+- `references/content-templates.md`: template selection criteria
+- `references/distribution-playbook.md`: channel-specific distribution tactics
+- `references/internal-linking.md`: link architecture patterns
+- `skills/blog/references/research-quality.md` - 5-dim quality rubric, pre-flight trap classes, freshness floors (v1.8.0; cross-skill ref lives in the orchestrator's references dir)
+- `skills/blog/references/synthesis-contract.md` - 6 LAWs for synthesis output (v1.8.0)
 
 ## Auto-loaded inputs (v1.8.0)
 
@@ -41,8 +41,8 @@ For evidence-led keyword discovery, audience-avatar prompts, and content priorit
 Gather from the user:
 1. **Topic or keyword** (required)
 2. **Target audience** (who reads this?)
-3. **Search intent** -- Informational, commercial, transactional, navigational
-4. **Business context** -- What does the company do? What's the CTA?
+3. **Search intent**: Informational, commercial, transactional, navigational
+4. **Business context**: What does the company do? What's the CTA?
 
 If only a topic is given, infer the rest from context.
 
@@ -87,13 +87,13 @@ criteria.
 ### Step 3: Competitive Analysis
 
 Analyze the top 3-5 ranking pages for the target keyword:
-1. **Content length** -- What's the average word count?
-2. **Heading structure** -- How many H2s? What topics do they cover?
-3. **Visual elements** -- Do competitors use charts, images, videos?
-4. **Content gaps** -- What do all competitors miss?
-5. **Freshness** -- How recently were they updated?
-6. **Schema** -- Do they use FAQ or other rich results? (Note: HowTo deprecated Sept 2023)
-7. **Template pattern** -- What content format do top results use?
+1. **Content length**: What's the average word count?
+2. **Heading structure**: How many H2s? What topics do they cover?
+3. **Visual elements**: Do competitors use charts, images, videos?
+4. **Content gaps**: What do all competitors miss?
+5. **Freshness**: How recently were they updated?
+6. **Schema**: Do they use FAQ or other rich results? (Note: HowTo deprecated Sept 2023)
+7. **Template pattern**: What content format do top results use?
 
 ### Step 4: Statistics Research
 
@@ -112,16 +112,16 @@ Output format:
 # Content Brief: [Title Suggestion]
 
 ## Template
-**Recommended**: [template-name] -- [1-sentence rationale]
+**Recommended**: [template-name]: [1-sentence rationale]
 **Template file**: `templates/[type].md`
 
 ## Target Keywords
-- **Primary**: [keyword] -- [estimated monthly search volume if available]
+- **Primary**: [keyword]: [estimated monthly search volume if available]
 - **Secondary**: [keyword 1], [keyword 2], [keyword 3]
 - **Questions**: [question 1], [question 2], [question 3]
 
 ## Search Intent
-[Informational/Commercial/Transactional] -- [1-2 sentence explanation of
+[Informational/Commercial/Transactional]: [1-2 sentence explanation of
 what the searcher wants]
 
 ## Content Parameters
@@ -152,7 +152,7 @@ Alternative titles:
 - **[ORIGINAL DATA]**: [Suggestion for proprietary data, survey, experiment,
   or benchmark the author can produce to differentiate this post]
 - **[PERSONAL EXPERIENCE]**: [Suggestion for first-hand observation, test
-  result, or case study to include -- "When we tested X, we found Y"]
+  result, or case study to include: "When we tested X, we found Y"]
 - **[UNIQUE INSIGHT]**: [Suggestion for contrarian take, novel analysis,
   or non-obvious connection that competitors have not covered]
 
@@ -179,9 +179,9 @@ Alternative titles:
 [... repeat for 6-8 sections ...]
 
 ### FAQ Section (3-5 items)
-1. [Question] -- Answer with [stat + source]
-2. [Question] -- Answer with [stat + source]
-3. [Question] -- Answer with [stat + source]
+1. [Question]: Answer with [stat + source]
+2. [Question]: Answer with [stat + source]
+3. [Question]: Answer with [stat + source]
 
 ### Conclusion (100-150 words)
 - Key takeaways (bulleted)
@@ -231,17 +231,17 @@ claim that can stand alone when quoted.
 
 ## Internal Link Architecture
 - **Link TO** (from this new post to existing pages):
-  1. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  2. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  3. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  4. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  5. [Page title/URL] -- anchor text: "[descriptive anchor]"
+  1. [Page title/URL]: anchor text: "[descriptive anchor]"
+  2. [Page title/URL]: anchor text: "[descriptive anchor]"
+  3. [Page title/URL]: anchor text: "[descriptive anchor]"
+  4. [Page title/URL]: anchor text: "[descriptive anchor]"
+  5. [Page title/URL]: anchor text: "[descriptive anchor]"
 - **Link FROM** (update these existing pages to link to this new post):
-  1. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  2. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  3. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  4. [Page title/URL] -- anchor text: "[descriptive anchor]"
-  5. [Page title/URL] -- anchor text: "[descriptive anchor]"
+  1. [Page title/URL]: anchor text: "[descriptive anchor]"
+  2. [Page title/URL]: anchor text: "[descriptive anchor]"
+  3. [Page title/URL]: anchor text: "[descriptive anchor]"
+  4. [Page title/URL]: anchor text: "[descriptive anchor]"
+  5. [Page title/URL]: anchor text: "[descriptive anchor]"
 - **Pillar connection**: [Which pillar page this belongs to, if applicable]
 - **Cluster position**: [Hub / Spoke / Standalone]
 

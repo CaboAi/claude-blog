@@ -91,12 +91,12 @@ These files are USER-CONTROLLED or potentially THIRD-PARTY-CONTROLLED (if a user
 
 The same indirect prompt-injection risk that applies to WebFetch results (T9) applies here. Mitigation, enforced by the orchestrator's "Untrusted-Data Contract" section in `skills/blog/SKILL.md`:
 
-1. **Fenced injection**: file contents are wrapped in explicit `=== BEGIN UNTRUSTED PROJECT-ROOT CONTEXT (file.md) ===` / `=== END ===` markers, with a preamble instructing downstream agents to treat the contents as data, not instructions.
-2. **Pre-injection sanitization scan**: orchestrator scans for instruction-shaped patterns (`ignore previous`, `from now on`, `exfiltrate`, `system:`, `<|im_start|>`, `act as`, etc.). If matched, prepends a warning to the fence and notes the suspected injection in the agent prompt.
+1. **Fenced injection with per-load nonce (v1.8.2)**: file contents are wrapped in explicit `=== BEGIN UNTRUSTED PROJECT-ROOT CONTEXT (file.md) [nonce: <128-bit hex>] ===` / `=== END ... [nonce: <same hex>] ===` markers. The nonce is freshly generated for every load (via `secrets.token_hex(16)` or equivalent). An attacker who controls the file contents cannot pre-embed a counterfeit terminator because they cannot predict the nonce.
+2. **Pre-injection sanitization scan**: orchestrator scans for instruction-shaped patterns (`ignore previous`, `from now on`, `exfiltrate`, `system:`, `<|im_start|>`, `act as`, `=== BEGIN/END UNTRUSTED`, etc.). If matched, prepends a warning to the fence and notes the suspected injection in the agent prompt.
 3. **Tool-boundary preservation**: directives in project-root files CANNOT unlock tools the downstream agent does not already have via its frontmatter. An agent without `WebFetch` MUST NOT acquire it because BRAND.md said to.
 4. **Provenance**: file mtime is included in the injection so the agent can reason about freshness ("the BRAND.md I'm reading was modified at timestamp T").
 
-Failure mode this closes: a poisoned BRAND.md from a shared repo could instruct the agent with WebFetch authority to exfiltrate research findings to an attacker-controlled URL. Now that BRAND.md is fenced as untrusted data, the agent recognizes the directive as an injection attempt and refuses to comply.
+Failure mode this closes: a poisoned BRAND.md from a shared repo could instruct the agent with WebFetch authority to exfiltrate research findings to an attacker-controlled URL. The four layers (nonce + sanitize + tool-boundary + provenance) provide independent failure modes the attacker must defeat simultaneously. Even if the attacker breaks the fence (impossible with per-load nonce, but assumed for defense-in-depth), the tool-boundary rule blocks tool-grant escalation; even if both fail, the sanitization scan surfaces the attempt to the reviewer.
 
 Recommended user hygiene: add `BRAND.md`, `VOICE.md`, `DISCOURSE.md` to `.gitignore` in repos where the brand context or research is confidential.
 

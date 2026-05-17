@@ -7,9 +7,11 @@ description: >
   site operators plus recency filters. Produces DISCOURSE.md (a structured
   brief) and JSON output the writer can consume. Complements blog-researcher
   (which focuses on authority sources) with a recency-and-engagement lens.
-  Use when user says "blog discourse", "what are people saying about",
-  "voice of customer", "social listening", "30-day research", "trend
-  research", "what's the discussion on", "/blog discourse".
+  Use when user says "blog discourse", "discourse research", "what are
+  people saying about", "research what people are saying", "voice of
+  customer", "social listening", "30-day research", "trend research",
+  "what's the discussion on", "real-time research", "practitioner discourse",
+  "/blog discourse".
 user-invokable: true
 argument-hint: "<topic> [--feed-into write|brief|strategy] [--days 30|90] [--input results.json]"
 license: MIT

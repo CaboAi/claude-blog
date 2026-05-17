@@ -108,7 +108,7 @@ When multiple retrieved sources cite the same upstream source (e.g. five article
    - Write a descriptive alt text sentence
    - Note relevance to the blog topic
 
-### Image URL Verification (Required -- Never Skip)
+### Image URL Verification (Required: Never Skip)
 
 After finding each candidate image URL:
 
@@ -116,11 +116,11 @@ After finding each candidate image URL:
    - Pixabay page URLs (`pixabay.com/photos/...`) are NOT image URLs
    - Unsplash photo pages (`unsplash.com/photos/...`) are NOT image URLs
 2. If you have a page URL, extract the direct image URL:
-   - WebFetch the page and look for the `og:image` meta tag -- this is the most reliable source
+   - WebFetch the page and look for the `og:image` meta tag: this is the most reliable source
    - Pixabay CDN pattern: `https://cdn.pixabay.com/photo/YYYY/MM/DD/HH/MM/filename.jpg`
    - Unsplash CDN pattern: `https://images.unsplash.com/photo-<id>?w=1200&h=630&fit=crop&q=80`
 3. Verify the URL resolves: `curl -sI "<url>" | head -1`
-   - Must return HTTP 200 (or 301/302 -- follow redirect and use final URL)
+   - Must return HTTP 200 (or 301/302: follow redirect and use final URL)
    - If 403/404: discard and find replacement
 4. Mark each image as Verified (HTTP 200) or Unverified in your output table
 5. Never include more than 1 Unverified image in a research packet
@@ -157,7 +157,7 @@ should never block the research workflow.
 5. If auth is missing or no notebooks match, skip silently and continue with WebSearch
 
 **Source classification:** NotebookLM answers are Tier 1 because they come
-exclusively from the user's own uploaded documents -- zero hallucination risk.
+exclusively from the user's own uploaded documents: zero hallucination risk.
 
 ### When Analyzing Competition
 

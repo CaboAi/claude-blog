@@ -132,13 +132,13 @@ AI citation platforms.
 
 ### Workflow
 
-1. **Topic clarification** -- Asks for audience, keyword, word count, platform
-2. **Research** -- Spawns `blog-researcher` agent to find 8-12 statistics and images
-3. **Outline** -- Generates structured outline, presents for approval
-4. **Chart generation** -- Creates 2-4 SVG charts via built-in `blog-chart`
-5. **Content writing** -- Spawns `blog-writer` agent for the full article
-6. **Quality check** -- Verifies all 6 optimization pillars
-7. **Delivery** -- Saves file and presents summary
+1. **Topic clarification**: Asks for audience, keyword, word count, platform
+2. **Research**: Spawns `blog-researcher` agent to find 8-12 statistics and images
+3. **Outline**: Generates structured outline, presents for approval
+4. **Chart generation**: Creates 2-4 SVG charts via built-in `blog-chart`
+5. **Content writing**: Spawns `blog-writer` agent for the full article
+6. **Quality check**: Verifies all 6 optimization pillars
+7. **Delivery**: Saves file and presents summary
 
 ### Output
 
@@ -154,9 +154,9 @@ A complete blog post in the detected format (Markdown, MDX, or HTML) with:
 
 ### Related Commands
 
-- `/blog brief` -- Generate a brief first, then feed it to `/blog write`
-- `/blog analyze` -- Score the finished post
-- `/blog seo-check` -- Validate SEO after writing
+- `/blog brief`: Generate a brief first, then feed it to `/blog write`
+- `/blog analyze`: Score the finished post
+- `/blog seo-check`: Validate SEO after writing
 
 ---
 
@@ -175,13 +175,13 @@ the author's voice and unique perspective.
 
 ### Workflow
 
-1. **Audit** -- Reads the file, scores it against the quality checklist
-2. **Plan** -- Presents section-by-section optimization plan for approval
-3. **Research** -- Finds replacement statistics for fabricated/unsourced data
-4. **Chart generation** -- Adds SVG charts if the post has fewer than 2
-5. **Rewrite** -- Applies answer-first formatting, fixes paragraphs, adds FAQ
-6. **Verification** -- Confirms all quality gates pass
-7. **Summary** -- Reports before/after scores and changes made
+1. **Audit**: Reads the file, scores it against the quality checklist
+2. **Plan**: Presents section-by-section optimization plan for approval
+3. **Research**: Finds replacement statistics for fabricated/unsourced data
+4. **Chart generation**: Adds SVG charts if the post has fewer than 2
+5. **Rewrite**: Applies answer-first formatting, fixes paragraphs, adds FAQ
+6. **Verification**: Confirms all quality gates pass
+7. **Summary**: Reports before/after scores and changes made
 
 ### Output
 
@@ -196,8 +196,8 @@ The rewritten file in its original format with:
 
 ### Related Commands
 
-- `/blog analyze` -- Audit before rewriting to see the starting score
-- `/blog update` -- Alias for freshness-focused rewrite
+- `/blog analyze`: Audit before rewriting to see the starting score
+- `/blog update`: Alias for freshness-focused rewrite
 
 ---
 
@@ -227,7 +227,7 @@ prioritized improvement recommendations.
 ```
 Blog Quality Report: [Title]
 
-Score: 78/100 -- Good
+Score: 78/100: Good
 
 Score Breakdown
 | Category               | Score | Max |
@@ -261,8 +261,8 @@ python3 ~/.claude/skills/blog/scripts/analyze_blog.py post.md -o report.json
 
 ### Related Commands
 
-- `/blog rewrite` -- Apply the recommended fixes automatically
-- `/blog audit` -- Full-site assessment (broader than single-file analyze)
+- `/blog rewrite`: Apply the recommended fixes automatically
+- `/blog audit`: Full-site assessment (broader than single-file analyze)
 
 ---
 
@@ -281,11 +281,11 @@ statistics research, visual element planning, and a structured outline.
 
 ### Workflow
 
-1. **Topic intake** -- Gathers topic, audience, intent, business context
-2. **Keyword research** -- Primary keyword, 3-5 secondary, 3-5 questions
-3. **Competitive analysis** -- Analyzes top 3-5 ranking pages
-4. **Statistics research** -- Finds 8-12 stats with sources
-5. **Brief generation** -- Complete brief with outline and recommendations
+1. **Topic intake**: Gathers topic, audience, intent, business context
+2. **Keyword research**: Primary keyword, 3-5 secondary, 3-5 questions
+3. **Competitive analysis**: Analyzes top 3-5 ranking pages
+4. **Statistics research**: Finds 8-12 stats with sources
+5. **Brief generation**: Complete brief with outline and recommendations
 
 ### Output
 
@@ -305,9 +305,9 @@ A detailed brief document saved to `briefs/[slug]-brief.md` containing:
 
 ### Related Commands
 
-- `/blog write` -- Write the article using the generated brief
-- `/blog strategy` -- Higher-level planning before individual briefs
-- `/blog outline` -- Lighter-weight outline without full research
+- `/blog write`: Write the article using the generated brief
+- `/blog strategy`: Higher-level planning before individual briefs
+- `/blog outline`: Lighter-weight outline without full research
 
 ---
 
@@ -336,15 +336,15 @@ content velocity targets, quarterly goals, and distribution plan.
 
 ### Key Features
 
-- **Topic cluster design** -- 3-5 pillar + supporting content clusters
-- **Freshness scheduling** -- 30-day update cycles for high-priority posts
-- **Content mix** -- Balances new posts with freshness updates
-- **Seasonal hooks** -- Industry events, trending topics, report releases
+- **Topic cluster design**: 3-5 pillar + supporting content clusters
+- **Freshness scheduling**: 30-day update cycles for high-priority posts
+- **Content mix**: Balances new posts with freshness updates
+- **Seasonal hooks**: Industry events, trending topics, report releases
 
 ### Related Commands
 
-- `/blog strategy` -- Define pillars and positioning before calendar planning
-- `/blog brief` -- Create briefs for calendar items
+- `/blog strategy`: Define pillars and positioning before calendar planning
+- `/blog brief`: Create briefs for calendar items
 
 ---
 
@@ -363,14 +363,14 @@ competitive landscape analysis, and distribution planning.
 
 ### Workflow
 
-1. **Discovery** -- Business context, goals, current state, competitors
-2. **Competitive landscape** -- Analyzes competitor blogs and AI visibility
-3. **Audience mapping** -- 2-3 segments with pain points and search behavior
-4. **Content pillar design** -- 3-5 pillars with keyword themes
-5. **Differentiation** -- First-hand experience and original data plans
-6. **Distribution channels** -- YouTube, Reddit, reviews, publications
-7. **Measurement framework** -- Traditional SEO + AI citation metrics
-8. **Strategy document** -- Executive summary through 90-day roadmap
+1. **Discovery**: Business context, goals, current state, competitors
+2. **Competitive landscape**: Analyzes competitor blogs and AI visibility
+3. **Audience mapping**: 2-3 segments with pain points and search behavior
+4. **Content pillar design**: 3-5 pillars with keyword themes
+5. **Differentiation**: First-hand experience and original data plans
+6. **Distribution channels**: YouTube, Reddit, reviews, publications
+7. **Measurement framework**: Traditional SEO + AI citation metrics
+8. **Strategy document**: Executive summary through 90-day roadmap
 
 ### Output
 
@@ -386,8 +386,8 @@ A full strategy document with:
 
 ### Related Commands
 
-- `/blog calendar` -- Operationalize the strategy into a publishing schedule
-- `/blog brief` -- Create briefs for strategy-identified topics
+- `/blog calendar`: Operationalize the strategy into a publishing schedule
+- `/blog brief`: Create briefs for strategy-identified topics
 
 ---
 
@@ -415,8 +415,8 @@ A structured outline with:
 
 ### Related Commands
 
-- `/blog brief` -- Full brief with research (outline is a subset)
-- `/blog write` -- Write from the outline directly
+- `/blog brief`: Full brief with research (outline is a subset)
+- `/blog write`: Write from the outline directly
 
 ---
 
@@ -446,8 +446,8 @@ quality.
 
 ### Related Commands
 
-- `/blog analyze` -- Full quality audit (content + SEO + citations)
-- `/blog schema` -- Generate missing schema markup
+- `/blog analyze`: Full quality audit (content + SEO + citations)
+- `/blog schema`: Generate missing schema markup
 
 ---
 
@@ -486,8 +486,8 @@ not execute JavaScript.
 
 ### Related Commands
 
-- `/blog seo-check` -- Validates schema presence and correctness
-- `/blog analyze` -- Checks schema as part of the full quality audit
+- `/blog seo-check`: Validates schema presence and correctness
+- `/blog analyze`: Checks schema as part of the full quality audit
 
 ---
 
@@ -515,8 +515,8 @@ Repurpose a blog post into content for other platforms and formats.
 
 ### Related Commands
 
-- `/blog strategy` -- Identifies distribution channels for repurposing
-- `/blog write` -- Create the original post to repurpose
+- `/blog strategy`: Identifies distribution channels for repurposing
+- `/blog write`: Create the original post to repurpose
 
 ---
 
@@ -545,8 +545,8 @@ visibility on AI platforms (ChatGPT, Perplexity, Google AI Overviews).
 
 ### Related Commands
 
-- `/blog analyze` -- Full quality audit including GEO metrics
-- `/blog rewrite` -- Apply GEO optimizations automatically
+- `/blog analyze`: Full quality audit including GEO metrics
+- `/blog rewrite`: Apply GEO optimizations automatically
 
 ---
 
@@ -574,9 +574,9 @@ and produces a comprehensive report.
 
 ### Related Commands
 
-- `/blog analyze` -- Single-file audit (audit is the batch version)
-- `/blog calendar` -- Plan content based on audit findings
-- `/blog rewrite` -- Fix posts identified by the audit
+- `/blog analyze`: Single-file audit (audit is the batch version)
+- `/blog calendar`: Plan content based on audit findings
+- `/blog rewrite`: Fix posts identified by the audit
 
 ---
 
@@ -603,8 +603,8 @@ changes and focuses on updating data and signals.
 
 ### Related Commands
 
-- `/blog rewrite` -- Full rewrite (more aggressive than update)
-- `/blog audit` -- Find posts that need updating
+- `/blog rewrite`: Full rewrite (more aggressive than update)
+- `/blog audit`: Find posts that need updating
 
 ---
 
@@ -618,7 +618,7 @@ changes and focuses on updating data and signals.
 /blog image setup
 ```
 
-**Flow**: See `skills/blog-image/SKILL.md` -- Creative Director pattern with
+**Flow**: See `skills/blog-image/SKILL.md`: Creative Director pattern with
 the 6-component Reasoning Brief (Subject, Action, Context, Composition,
 Lighting, Style). The `setup` subcommand defaults to `--global` (writes
 user-private `~/.claude/settings.json`, mode 0600) per audit VULN-001 fix.

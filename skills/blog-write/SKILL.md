@@ -14,7 +14,7 @@ argument-hint: "<topic>"
 license: MIT
 ---
 
-# Blog Writer -- New Article Generation
+# Blog Writer: New Article Generation
 
 Writes complete blog articles from a topic, brief, or outline. Every article
 follows the 6 pillars of dual optimization (Google rankings + AI citations).
@@ -22,12 +22,12 @@ follows the 6 pillars of dual optimization (Google rankings + AI citations).
 **Key references** (paths relative to repo root; references live in the
 main `blog` skill's references directory, not in `blog-write/`):
 
-- `skills/blog/references/synthesis-contract.md` -- 6 LAWs for synthesis output (v1.8.0; applies whenever the article embeds research-synthesis prose)
-- `skills/blog/references/content-templates.md` -- Template selection guide and usage
-- `skills/blog/references/quality-scoring.md` -- 5-category scoring (Content 30, SEO 25, E-E-A-T 15, Technical 15, AI Citation 15)
-- `skills/blog/references/eeat-signals.md` -- Experience, expertise, authority, trust markers
-- `skills/blog/references/internal-linking.md` -- Linking strategy and anchor text rules
-- `skills/blog/references/visual-media.md` -- Image sourcing and chart styling
+- `skills/blog/references/synthesis-contract.md`: 6 LAWs for synthesis output (v1.8.0; applies whenever the article embeds research-synthesis prose)
+- `skills/blog/references/content-templates.md`: Template selection guide and usage
+- `skills/blog/references/quality-scoring.md`: 5-category scoring (Content 30, SEO 25, E-E-A-T 15, Technical 15, AI Citation 15)
+- `skills/blog/references/eeat-signals.md`: Experience, expertise, authority, trust markers
+- `skills/blog/references/internal-linking.md`: Linking strategy and anchor text rules
+- `skills/blog/references/visual-media.md`: Image sourcing and chart styling
 
 ## Workflow
 
@@ -81,7 +81,7 @@ Select the appropriate content template from the 12 templates in
    | Survey results, experiment, original data | `data-research` |
    | Q&A, knowledge base, "What is X" | `faq-knowledge` |
 
-2. **Load the matching template** -- Read from `skills/blog/templates/<type>.md`
+2. **Load the matching template**: Read from `skills/blog/templates/<type>.md`
 3. **Adapt the outline** - Use the template's section structure, heading patterns,
    and word count guidance to shape Phase 3's outline
 4. **Fallback** - If no template clearly fits, use the generic outline structure

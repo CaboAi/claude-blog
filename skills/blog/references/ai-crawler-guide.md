@@ -1,9 +1,9 @@
-# Technical AI Visibility -- Crawler Access & Rendering
+# Technical AI Visibility: Crawler Access & Rendering
 
 ## Contents
 
 - [robots.txt Template for AI Crawlers](#robotstxt-template-for-ai-crawlers)
-- [Cloudflare AI Crawl Control -- CRITICAL](#cloudflare-ai-crawl-control----critical)
+- [Cloudflare AI Crawl Control: CRITICAL](#cloudflare-ai-crawl-control----critical)
 - [llms.txt Implementation](#llmstxt-implementation)
 - [Server-Side Rendering Requirements](#server-side-rendering-requirements)
 - [Performance Requirements](#performance-requirements)
@@ -19,7 +19,7 @@ default behavior.
 
 ```
 # ===========================================
-# AI Search & LLM Crawlers -- Explicitly Allow
+# AI Search & LLM Crawlers: Explicitly Allow
 # ===========================================
 
 # OpenAI
@@ -158,7 +158,7 @@ Treat each bot category differently based on your goals:
 
 ---
 
-## Cloudflare AI Crawl Control -- CRITICAL
+## Cloudflare AI Crawl Control: CRITICAL
 
 **Since July 2025, Cloudflare blocks AI crawlers by default on new domains.**
 This is the single most common reason blogs are invisible to AI systems despite
@@ -254,7 +254,7 @@ unproven. Implement it — but don't rely on it as a visibility strategy.
 - Use markdown-style links: `[Title](URL): Description`
 - Include only your most important and highest-quality pages
 - Update when you publish significant new content
-- This is NOT a sitemap replacement -- it supplements sitemap.xml
+- This is NOT a sitemap replacement: it supplements sitemap.xml
 
 ---
 
@@ -329,11 +329,11 @@ from OpenAI, Anthropic, or Perplexity. Treat as directional targets, not guarant
 
 ### Optimization Priorities
 
-1. **Use a CDN** -- Content must be served from edge locations
-2. **Enable compression** -- gzip or Brotli for all text responses
-3. **Minimize HTML bloat** -- Remove unused CSS/JS from HTML response
-4. **Cache aggressively** -- Static pages should have long cache headers
-5. **Pre-render** -- Use SSG or SSR, never CSR for content pages
+1. **Use a CDN**: Content must be served from edge locations
+2. **Enable compression**: gzip or Brotli for all text responses
+3. **Minimize HTML bloat**: Remove unused CSS/JS from HTML response
+4. **Cache aggressively**: Static pages should have long cache headers
+5. **Pre-render**: Use SSG or SSR, never CSR for content pages
 
 ---
 
@@ -377,7 +377,7 @@ grep -c "your-expected-heading-text" /tmp/gptbot-view.html
 
 | Indicator | What It Means |
 |-----------|---------------|
-| Empty `<div id="root"></div>` | React CSR -- content loads via JS only |
+| Empty `<div id="root"></div>` | React CSR: content loads via JS only |
 | Empty `<div id="__next"></div>` without SSR | Next.js without getServerSideProps/getStaticProps |
 | `<noscript>` contains the content | Content explicitly hidden from non-JS clients |
 | `<script>` tags contain all content as JSON | Data fetched client-side, not in HTML |

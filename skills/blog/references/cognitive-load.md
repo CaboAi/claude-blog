@@ -72,7 +72,7 @@ A section that triggers two or more "overloaded" rows is a P1; break it up befor
 
 1. **new_entity_density**: capitalized phrases not seen in prior sections, normalized per 100 words. High counts signal too many proper nouns introduced at once.
 2. **numeric_claim_density**: count of numbers (percentages, counts, currencies, dates) per 100 words.
-3. **jargon_introduction_count**: words that match a domain-jargon list (configurable) and have not been defined in or before the section.
+3. **jargon_introduction_count**: words that match a domain-jargon list and have not been defined in or before the section. The default list lives at the top of `scripts/cognitive_load.py` and covers SEO/GEO/web-vitals terms. To extend for a different domain, pass `--jargon <path-to-newline-delimited-file>`; entries augment the defaults rather than replacing them.
 4. **forward_reference_count**: phrases like "as we will see," "discussed below," "later in this post."
 5. **avg_clause_depth**: average count of subordinate-clause markers per sentence (commas, semicolons, "which," "that," parentheticals).
 6. **load_score**: composite 0 to 100 where higher is more loaded.

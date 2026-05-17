@@ -419,31 +419,75 @@ def extract_theme_keywords(text: str, topic_tokens: set[str], top_n: int = 5) ->
     return out
 
 
+CLUSTER_MIN_SIZE_FOR_MULTI_KEYWORD = 2  # 2+ shared keywords required for groups of size >= 2
+
 def cluster_by_theme(
     items: list[dict[str, Any]],
     topic: str,
 ) -> list[dict[str, Any]]:
-    """Bucket items by shared keyword themes."""
+    """Bucket items by shared keyword themes.
+
+    Improvement over v1.8.1 (FIND-017): instead of greedy single-keyword
+    assignment, an item joins a multi-item cluster only if it shares the
+    cluster keyword AND at least one additional keyword with another item
+    already in the cluster. This produces more cohesive themes when an
+    item touches multiple keywords. Singleton clusters (one item, one
+    keyword) are still kept so isolated themes surface in the niche bucket.
+    """
     topic_tokens = set(topic.lower().split())
+    item_keywords: dict[str, set[str]] = {}
     keyword_to_items: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in items:
         text = f"{item.get('title', '')} {item.get('snippet', '')}"
-        for kw in extract_theme_keywords(text, topic_tokens):
+        kws = set(extract_theme_keywords(text, topic_tokens))
+        url = item.get("url", "")
+        if url:
+            item_keywords[url] = kws
+        for kw in kws:
             keyword_to_items[kw].append(item)
 
-    clusters = []
+    clusters: list[dict[str, Any]] = []
     used_urls: set[str] = set()
     for kw, group in sorted(
         keyword_to_items.items(),
         key=lambda kv: (-len(kv[1]), kv[0]),
     ):
         unique_group = [g for g in group if g.get("url") not in used_urls]
-        if len(unique_group) < 1:
+        if not unique_group:
             continue
+        # Multi-keyword cohesion check for clusters that would have 2+ items.
+        if len(unique_group) >= CLUSTER_MIN_SIZE_FOR_MULTI_KEYWORD:
+            cohesive = _filter_cohesive(unique_group, kw, item_keywords)
+            if cohesive:
+                unique_group = cohesive
         for g in unique_group:
             used_urls.add(g.get("url", ""))
         clusters.append({"theme": kw, "items": unique_group})
     return clusters
+
+
+def _filter_cohesive(
+    group: list[dict[str, Any]],
+    primary_kw: str,
+    item_keywords: dict[str, set[str]],
+) -> list[dict[str, Any]]:
+    """Keep items that share at least one additional keyword with another
+    item in the group. The primary keyword is excluded from the shared count
+    since every item in the group has it by construction.
+    """
+    out: list[dict[str, Any]] = []
+    for item in group:
+        url = item.get("url", "")
+        my_kws = item_keywords.get(url, set()) - {primary_kw}
+        for other in group:
+            if other is item:
+                continue
+            other_url = other.get("url", "")
+            other_kws = item_keywords.get(other_url, set()) - {primary_kw}
+            if my_kws & other_kws:
+                out.append(item)
+                break
+    return out
 
 
 _SPECIFICS_KEYWORD_RE = re.compile(
@@ -595,6 +639,55 @@ def render_cluster_paragraph(cluster: dict[str, Any]) -> str:
     return f"- **{theme}.** {body}"
 
 
+def _render_header(topic: str, generated: dt.date, window_days: int,
+                   item_count: int, platforms_used: int) -> list[str]:
+    return [
+        f"# Discourse Brief: {topic}",
+        "",
+        f"> Generated {generated.isoformat()} via /blog discourse. "
+        f"Window: last {window_days} days. "
+        f"Sources scanned: {item_count} across {platforms_used} platforms.",
+        "",
+    ]
+
+
+def _render_decomposition(decomposition: list[str] | None) -> list[str]:
+    if not decomposition:
+        return []
+    lines = ["## Decomposition", ""]
+    for i, q in enumerate(decomposition, 1):
+        lines.append(f"{i}. {q}")
+    lines.append("")
+    return lines
+
+
+def _render_cluster_section(
+    heading: str,
+    clusters: list[dict[str, Any]],
+    empty_message: str,
+) -> list[str]:
+    lines = [heading, ""]
+    if clusters:
+        for cluster in clusters:
+            lines.append(render_cluster_paragraph(cluster))
+    else:
+        lines.append(f"- {empty_message}")
+    lines.append("")
+    return lines
+
+
+def _render_specifics(specifics: list[dict[str, Any]]) -> list[str]:
+    lines = ["## Practitioner specifics (commands, configs, links)", ""]
+    if specifics:
+        for item in specifics:
+            snippet = _safe_snippet(item.get("snippet") or "")[:160]
+            lines.append(f"- {render_inline_link(item)}: {snippet}")
+    else:
+        lines.append("- No concrete practitioner specifics surfaced in the window.")
+    lines.append("")
+    return lines
+
+
 def render_markdown(
     topic: str,
     window_days: int,
@@ -603,64 +696,36 @@ def render_markdown(
     items: list[dict[str, Any]],
     decomposition: list[str] | None,
 ) -> str:
+    """Assemble the DISCOURSE.md brief from bucket data.
+
+    Decomposed into small section helpers (FIND-021) so future format
+    tweaks (rearranging sections, swapping helpers, adding a new bucket)
+    do not require touching a 70-line monolith.
+    """
     platform_counts: dict[str, int] = defaultdict(int)
     for item in items:
         platform_counts[item.get("platform") or "web"] += 1
     platforms_used = len([p for p, c in platform_counts.items() if c > 0])
 
-    lines = [
-        f"# Discourse Brief: {topic}",
-        "",
-        f"> Generated {generated.isoformat()} via /blog discourse. "
-        f"Window: last {window_days} days. "
-        f"Sources scanned: {len(items)} across {platforms_used} platforms.",
-        "",
-    ]
-    if decomposition:
-        lines.append("## Decomposition")
-        lines.append("")
-        for i, q in enumerate(decomposition, 1):
-            lines.append(f"{i}. {q}")
-        lines.append("")
-
-    lines.append(f"## What's NEW in the last {window_days} days")
-    lines.append("")
-    if buckets["new"]:
-        for cluster in buckets["new"]:
-            lines.append(render_cluster_paragraph(cluster))
-    else:
-        lines.append("- No distinctly new themes detected in the window. Consider widening to --days 90.")
-    lines.append("")
-
-    lines.append("## Consensus across platforms")
-    lines.append("")
-    if buckets["consensus"]:
-        for cluster in buckets["consensus"]:
-            lines.append(render_cluster_paragraph(cluster))
-    else:
-        lines.append("- No cross-platform consensus themes detected.")
-    lines.append("")
-
-    lines.append("## Niche / single-source themes")
-    lines.append("")
-    if buckets["niche"]:
-        for cluster in buckets["niche"]:
-            lines.append(render_cluster_paragraph(cluster))
-    else:
-        lines.append(
-            "- None surfaced. Absence is honest; do not invent contrarian takes."
-        )
-    lines.append("")
-
-    lines.append("## Practitioner specifics (commands, configs, links)")
-    lines.append("")
-    if buckets["specifics"]:
-        for item in buckets["specifics"]:
-            snippet = _safe_snippet(item.get("snippet") or "")[:160]
-            lines.append(f"- {render_inline_link(item)}: {snippet}")
-    else:
-        lines.append("- No concrete practitioner specifics surfaced in the window.")
-    lines.append("")
+    lines: list[str] = []
+    lines.extend(_render_header(topic, generated, window_days, len(items), platforms_used))
+    lines.extend(_render_decomposition(decomposition))
+    lines.extend(_render_cluster_section(
+        f"## What's NEW in the last {window_days} days",
+        buckets["new"],
+        "No distinctly new themes detected in the window. Consider widening to --days 90.",
+    ))
+    lines.extend(_render_cluster_section(
+        "## Consensus across platforms",
+        buckets["consensus"],
+        "No cross-platform consensus themes detected.",
+    ))
+    lines.extend(_render_cluster_section(
+        "## Niche / single-source themes",
+        buckets["niche"],
+        "None surfaced. Absence is honest; do not invent contrarian takes.",
+    ))
+    lines.extend(_render_specifics(buckets["specifics"]))
 
     lines.append("## Source breakdown")
     lines.append("")

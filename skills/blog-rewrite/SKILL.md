@@ -16,7 +16,7 @@ argument-hint: "<file-path>"
 license: MIT
 ---
 
-# Blog Rewriter -- Optimize Existing Posts
+# Blog Rewriter: Optimize Existing Posts
 
 Rewrites and optimizes existing blog posts for dual ranking: Google search
 and AI citation platforms. Preserves the author's voice while applying the
@@ -27,8 +27,8 @@ and AI citation platforms. Preserves the author's voice while applying the
 - `references/eeat-signals.md` - Experience, expertise, authority, trust markers
 - `references/internal-linking.md` - Linking strategy and anchor text rules
 - `references/visual-media.md` - Image sourcing and chart styling
-- `references/synthesis-contract.md` - 6 LAWs for re-citation hygiene during rewrite (v1.8.0)
-- `references/research-quality.md` - cross-source clustering for replacement-statistic research (v1.8.0)
+- `skills/blog/references/synthesis-contract.md` - 6 LAWs for re-citation hygiene during rewrite (v1.8.0; cross-skill ref lives in the orchestrator's references dir)
+- `skills/blog/references/research-quality.md` - cross-source clustering for replacement-statistic research (v1.8.0)
 
 ## Cross-reference
 

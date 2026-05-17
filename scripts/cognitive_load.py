@@ -63,12 +63,19 @@ FORWARD_REFERENCE_PATTERNS = [
     r"\bcoming up\b",
 ]
 
-CLAUSE_MARKERS = [
-    ",", ";", "(", ")",
+# Clause-depth markers split into two weighted pools (FIND-013).
+# Punctuation can mark a clause boundary OR a list separator OR a parenthetical;
+# weight it lower to avoid inflating clause-depth scores on prose with normal
+# enumeration. Subordinator words are stronger signals of nested clauses.
+PUNCTUATION_MARKERS = [",", ";", "(", ")"]
+SUBORDINATOR_MARKERS = [
     " which ", " that ", " who ", " whose ",
     " although ", " though ", " unless ", " whereas ",
-    " because ", " since ", " while ",
+    " because ", " since ", " while ", " when ", " where ",
+    " if ", " until ", " before ", " after ",
 ]
+PUNCTUATION_WEIGHT = 0.3
+SUBORDINATOR_WEIGHT = 1.0
 
 # Currency, percentage, integer/decimal, year-like, ordinal numeric patterns
 NUMERIC_RE = re.compile(
@@ -131,15 +138,32 @@ def count_sentences(text: str) -> int:
 
 
 _COMMON_OPENERS = frozenset({
+    # Pronouns and demonstratives
     "The", "This", "That", "These", "Those", "It", "We", "You", "They",
     "I", "He", "She", "Me", "Him", "Her", "Us", "Them",
+    # Subordinators / interrogatives
     "If", "When", "While", "Where", "How", "What", "Why", "Who",
-    "First", "Second", "Third", "Next", "Then", "Now", "Here",
-    "Most", "Some", "All", "Every", "Each", "Both",
+    "Until", "Unless", "Although", "Though", "Because", "Since",
+    # Ordinals and adverbs
+    "First", "Second", "Third", "Next", "Then", "Now", "Here", "There",
+    "Most", "Some", "All", "Every", "Each", "Both", "Many", "Few",
+    "Always", "Never", "Often", "Sometimes",
+    # Conjunctions and prepositions
     "And", "Or", "But", "For", "Yet", "So", "With", "Without",
+    "From", "To", "By", "At", "In", "On", "Over", "Under",
+    "Through", "Across", "Around", "Between", "Among",
+    # Modals and auxiliaries used at sentence start
+    "Can", "Could", "Should", "Would", "Will", "Shall", "May", "Might", "Must",
+    # Months
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
+    "Jan", "Feb", "Mar", "Apr", "Jun", "Jul", "Aug", "Sep", "Sept", "Oct", "Nov", "Dec",
+    # Weekdays
     "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+    "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun",
+    # Common imperative openers in how-to prose
+    "Let", "Take", "Use", "Make", "Run", "Try", "See", "Note", "Add",
+    "Consider", "Imagine", "Suppose",
 })
 
 # All-caps tokens that are common-English words, not entities.
@@ -189,14 +213,24 @@ def count_forward_references(text: str) -> int:
 
 
 def avg_clause_depth(text: str) -> float:
+    """Average weighted clause-marker count per sentence.
+
+    Subordinator words (which, that, who, ...) score 1.0 each. Punctuation
+    boundaries (comma, semicolon, parens) score 0.3 each. The weighting
+    prevents enumeration commas ("red, white, and blue") from inflating the
+    metric the way a uniform weight would. Closes FIND-013.
+    """
     sentences = re.split(r"[.!?]+\s+", text)
     sentences = [s for s in sentences if s.strip()]
     if not sentences:
         return 0.0
-    total = 0
+    total = 0.0
     for sentence in sentences:
-        for marker in CLAUSE_MARKERS:
-            total += sentence.lower().count(marker)
+        low = sentence.lower()
+        for marker in PUNCTUATION_MARKERS:
+            total += sentence.count(marker) * PUNCTUATION_WEIGHT
+        for marker in SUBORDINATOR_MARKERS:
+            total += low.count(marker) * SUBORDINATOR_WEIGHT
     return round(total / len(sentences), 2)
 
 

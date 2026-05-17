@@ -301,6 +301,8 @@ def test_orchestrator_contract_resists_neutering(tmp_path: Path) -> None:
         "indirect prompt-injection",
         "Fence the content",
         "Sanitize",
+        "nonce",  # v1.8.2 per-load random nonce hardening
+        "secrets.token_hex",  # specifies the nonce-generation API
     ]
     for phrase in must_have_exact:
         assert phrase in orchestrator, (

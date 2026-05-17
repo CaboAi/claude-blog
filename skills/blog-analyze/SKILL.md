@@ -15,18 +15,18 @@ argument-hint: "<file-path>"
 license: MIT
 ---
 
-# Blog Analyzer -- Quality Audit & Scoring
+# Blog Analyzer: Quality Audit & Scoring
 
 Scores blog posts on a 0-100 scale across 5 categories and provides prioritized
 improvement recommendations. Includes AI content detection analysis. Works with
 local files or published URLs.
 
 Reference documents (paths from repo root):
-- `skills/blog/references/quality-scoring.md` -- full scoring checklist
-- `skills/blog/references/eeat-signals.md` -- E-E-A-T evaluation criteria
-- `skills/blog/references/ai-slop-detection.md` -- two-tier reflex methodology (v1.8.0)
-- `skills/blog/references/editorial-heuristics.md` -- ordinal 0-4 rubric, P0-P3 severity (v1.8.0, used with `--rubric`)
-- `skills/blog/references/cognitive-load.md` -- per-section concept density (v1.8.0, used with `--cognitive-load`)
+- `skills/blog/references/quality-scoring.md`: full scoring checklist
+- `skills/blog/references/eeat-signals.md`: E-E-A-T evaluation criteria
+- `skills/blog/references/ai-slop-detection.md`: two-tier reflex methodology (v1.8.0)
+- `skills/blog/references/editorial-heuristics.md`: ordinal 0-4 rubric, P0-P3 severity (v1.8.0, used with `--rubric`)
+- `skills/blog/references/cognitive-load.md`: per-section concept density (v1.8.0, used with `--cognitive-load`)
 
 ## Input Handling
 
@@ -136,7 +136,7 @@ Analyze the post for AI-generated content risk:
 - AI writing: low variance (consistently medium-length sentences)
 - Score: 0-10 scale (10 = very human-like burstiness)
 
-**Known AI Phrase Detection** -- flag occurrences of these 17 phrases:
+**Known AI Phrase Detection**: flag occurrences of these 17 phrases:
 1. "It's important to note"
 2. "In today's digital landscape"
 3. "Delve into"
@@ -213,7 +213,7 @@ Default output format (Markdown):
 ```
 ## Blog Quality Report: [Title]
 
-**Score: [X]/100** -- [Rating]
+**Score: [X]/100**: [Rating]
 
 ### Score Breakdown
 | Category | Score | Max | Notes |
@@ -229,7 +229,7 @@ Default output format (Markdown):
 - **Burstiness score**: [X]/10 ([human-like / moderate / flat])
 - **AI phrases detected**: [N] ([list phrases found])
 - **Vocabulary diversity (TTR)**: [X] ([high / acceptable / low])
-- **AI probability**: [X]% -- [No concern / Review recommended / High risk]
+- **AI probability**: [X]%: [No concern / Review recommended / High risk]
 - **Flagged passages**: [quote specific flat or formulaic sections, if any]
 
 ### Issues Found
@@ -259,7 +259,7 @@ Default output format (Markdown):
 - OG/social tags: [present/missing]
 
 ### Recommended Actions
-1. [Most impactful fix -- Critical items first]
+1. [Most impactful fix: Critical items first]
 2. [Second most impactful]
 3. [Third]
 
@@ -323,9 +323,9 @@ summary table. Use `--sort score` to order by score (ascending by default).
 | post-3.md | 71 | Acceptable | 20/30 | 16/25 | 10/15 | 12/15 | 13/15 | 25% | No answer-first |
 
 ### Priority Queue (Lowest Scoring First)
-1. post-2.md (42) -- Full rewrite needed, high AI content risk
-2. post-3.md (71) -- Answer-first formatting + stats needed
-3. post-1.md (85) -- Add OG tags, minor polish
+1. post-2.md (42): Full rewrite needed, high AI content risk
+2. post-3.md (71): Answer-first formatting + stats needed
+3. post-1.md (85): Add OG tags, minor polish
 
 Run `/blog rewrite <file>` on each, starting from lowest score.
 ```
