@@ -412,17 +412,41 @@ After installation, `claude-blog` occupies this structure inside `~/.claude/`:
 │   ├── blog-schema/SKILL.md
 │   ├── blog-repurpose/SKILL.md
 │   ├── blog-geo/SKILL.md
-│   └── blog-audit/SKILL.md
+│   ├── blog-audit/SKILL.md
+│   ├── blog-chart/SKILL.md             # internal-only (SVG generation)
+│   ├── blog-image/SKILL.md             # v1.4.0
+│   ├── blog-cannibalization/SKILL.md
+│   ├── blog-factcheck/SKILL.md
+│   ├── blog-persona/SKILL.md
+│   ├── blog-taxonomy/SKILL.md
+│   ├── blog-notebooklm/SKILL.md        # v1.5.0
+│   ├── blog-audio/SKILL.md             # v1.6.0
+│   ├── blog-google/SKILL.md            # v1.6.5
+│   ├── blog-cluster/SKILL.md           # v1.7.0
+│   ├── blog-flow/SKILL.md              # v1.7.0
+│   ├── blog-multilingual/SKILL.md      # v1.7.0
+│   ├── blog-translate/SKILL.md         # v1.7.0
+│   ├── blog-localize/SKILL.md          # v1.7.0
+│   ├── blog-locale-audit/SKILL.md      # v1.7.0
+│   ├── blog-brand/SKILL.md             # v1.8.0
+│   └── blog-discourse/SKILL.md         # v1.8.0
 └── agents/
     ├── blog-researcher.md
     ├── blog-writer.md
     ├── blog-seo.md
-    └── blog-reviewer.md
+    ├── blog-reviewer.md
+    └── blog-translator.md              # v1.7.0
 ```
 
-**Component counts (v1.7.0)**: 1 orchestrator + 27 sub-skills (28 total), 5 agents,
-13+ references (plus per-sub-skill references and 30 synced FLOW prompts),
-12 content templates, multiple Python scripts (`scripts/sync_flow.py`,
-`skills/blog/scripts/analyze_blog.py`, plus per-sub-skill scripts under
-`blog-google/`, `blog-notebooklm/`, `blog-audio/`, `blog-image/`).
-Note: this section was historically out of date; counts revised in v1.7.0.
+**Component counts (v1.8.5)**: 1 orchestrator + 29 sub-skills = 30 skill dirs
+total, 5 agents (blog-researcher, blog-writer, blog-seo, blog-reviewer,
+blog-translator), 20 references in `skills/blog/references/` (plus per-sub-skill
+references and 30 synced FLOW prompts under `skills/blog-flow/references/`),
+12 content templates, 6 root-level scripts (`scripts/analyze_blog.py`,
+`cognitive_load.py`, `discourse_research.py`, `load_untrusted_root.py`,
+`lint_prose.py`, `sync_flow.py`) plus per-sub-skill scripts under
+`blog-google/`, `blog-notebooklm/`, `blog-audio/`, `blog-image/`.
+v1.8.0+ adds three project-root context files (BRAND.md / VOICE.md /
+DISCOURSE.md, auto-loaded via `scripts/load_untrusted_root.py` with
+CSPRNG nonce fencing). v1.8.4+ enforces prose hygiene and version
+coherence via CI (see `scripts/lint_prose.py`, `tests/test_version_coherence.py`).

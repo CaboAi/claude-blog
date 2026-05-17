@@ -37,6 +37,7 @@ FORBIDDEN = {
 # files have so many that the per-file allowlist is clearer.
 FILE_ALLOWLIST = {
     "tests/test_discourse_research.py",   # fixtures + assertions
+    "tests/test_lint_prose.py",           # v1.8.5: intentional violation fixtures
     "scripts/discourse_research.py",      # dict keys
     "scripts/lint_prose.py",              # this file itself: dict keys + pattern data
     "skills/blog/references/synthesis-contract.md",  # pedagogical inside backticks
@@ -47,11 +48,15 @@ def _find_violations_in_line(line: str) -> list[tuple[str, str]]:
     """Return list of (char, description) for any forbidden chars in this
     line OUTSIDE backtick spans. Caller has already verified the line is
     not inside a code fence.
+
+    v1.8.5 fix (6TH-AUDIT-007): mask double-backtick spans (``code``) FIRST,
+    then single-backtick spans. Single-backtick regex would otherwise match
+    the empty span between two opening backticks and leave content exposed.
     """
-    # Mask out backtick spans by replacing them with the same number of
-    # placeholder characters (so column offsets stay aligned, though we
-    # don't currently use column info).
-    masked = re.sub(r"`[^`\n]*`", lambda m: " " * len(m.group(0)), line)
+    # Mask double-backtick spans first: ``content with single ` inside``.
+    masked = re.sub(r"``[^\n]*?``", lambda m: " " * len(m.group(0)), line)
+    # Then mask single-backtick spans.
+    masked = re.sub(r"`[^`\n]*`", lambda m: " " * len(m.group(0)), masked)
     out: list[tuple[str, str]] = []
     for char, name in FORBIDDEN.items():
         if char in masked:
@@ -60,13 +65,19 @@ def _find_violations_in_line(line: str) -> list[tuple[str, str]]:
 
 
 def lint_file(path: Path) -> list[tuple[int, str, str, str]]:
-    """Return list of (line_no, char, description, line_text) violations."""
+    """Return list of (line_no, char, description, line_text) violations.
+
+    v1.8.5 fix (6TH-AUDIT-006): track the OPENING fence delimiter so a
+    nested fence with a different delimiter doesn't toggle state. A
+    `~~~` fence is closed only by `~~~`, and a ``` fence is closed only
+    by ```.
+    """
     try:
         text = path.read_text(encoding="utf-8")
     except (UnicodeDecodeError, OSError):
         return []
     violations: list[tuple[int, str, str, str]] = []
-    in_fence = False
+    fence_delim: str | None = None  # None when outside any fence
     in_frontmatter = False
     for i, line in enumerate(text.splitlines(), 1):
         if i == 1 and line.strip() == "---":
@@ -77,11 +88,18 @@ def lint_file(path: Path) -> list[tuple[int, str, str, str]]:
                 in_frontmatter = False
             continue
         stripped = line.lstrip()
-        if stripped.startswith("```") or stripped.startswith("~~~"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
+        if fence_delim is None:
+            if stripped.startswith("```"):
+                fence_delim = "```"
+                continue
+            if stripped.startswith("~~~"):
+                fence_delim = "~~~"
+                continue
+        else:
+            # Inside a fence; only the matching delimiter closes it.
+            if stripped.startswith(fence_delim):
+                fence_delim = None
+            continue  # all lines inside a fence are skipped
         for char, name in _find_violations_in_line(line):
             violations.append((i, char, name, line.rstrip()))
     return violations

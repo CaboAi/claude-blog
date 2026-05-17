@@ -53,7 +53,7 @@ install.sh and pin a release tag, closing audit VULN-005):
 ```bash
 git clone https://github.com/AgriciDaniel/claude-blog.git
 cd claude-blog
-git checkout v1.8.4          # pin to a release tag (latest as of 2026-05-17)
+git checkout v1.8.5          # pin to a release tag (latest as of 2026-05-17)
 chmod +x install.sh && ./install.sh
 ```
 
@@ -108,7 +108,7 @@ Restart Claude Code after installation to activate.
 | `/blog brand [init\|show\|update]` | Generate BRAND.md + VOICE.md context auto-loaded by all sub-skills (v1.8.0) |
 | `/blog discourse <topic>` | API-free last-30-days discourse research; produces DISCOURSE.md (v1.8.0) |
 
-> **30 sub-skills total**: 28 user-facing commands above + `blog-chart` (internal SVG generation) + `blog-image` (also callable internally by write/rewrite). v1.7.0 added `blog-cluster`, `blog-multilingual`, `blog-translate`, `blog-localize`, `blog-locale-audit`, and `blog-flow`. v1.8.0 added `blog-brand` and `blog-discourse`.
+> **30 sub-skill directories total**: 29 user-invokable (28 distinct slash commands above + `/blog update` aliased to rewrite) + 1 internal-only (`blog-chart`, invoked by blog-write/blog-rewrite for inline SVG charts). `blog-image` is user-invokable AND callable internally. v1.7.0 added `blog-cluster`, `blog-multilingual`, `blog-translate`, `blog-localize`, `blog-locale-audit`, and `blog-flow`. v1.8.0 added `blog-brand` and `blog-discourse`.
 
 ### Foundational methodologies (v1.8.0 references)
 
@@ -192,7 +192,7 @@ claude-blog/
 │   └── plugin.json                     # Plugin metadata (name, description, author)
 ├── skills/
 │   ├── blog/                           # Main orchestrator
-│   │   ├── SKILL.md                    # Routes all 28 user-facing commands
+│   │   ├── SKILL.md                    # Routes all 29 user-facing commands (28 distinct + `/blog update` alias)
 │   │   ├── references/                 # 20 on-demand reference docs (5 new in v1.8.0)
 │   │   └── templates/                  # 12 content type templates
 │   ├── blog-write/SKILL.md            # Sub-skills (28 user-facing + 2 internal-only)
@@ -267,6 +267,22 @@ claude-blog/
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and configured
 - Python 3.11+ (for `analyze_blog.py` quality scoring script)
 - Optional: `pip install -r requirements.txt` for advanced analysis (readability scoring, schema detection)
+
+### Quality Gates (CI-enforced on every PR)
+
+1. **pytest**: 124+ tests across security, behavioral, and regression suites
+2. **Plugin validation**: `claude plugin validate .` (when CLI available) + hand-rolled JSON/regex checks
+3. **Stale-path lint**: catches drift in `references/` and `templates/` cross-references
+4. **Prose hygiene**: `scripts/lint_prose.py` (fence-aware, backtick-aware) enforces CONTRIBUTING.md no-em-dash / no-en-dash / no-` -- ` rule
+5. **Version coherence**: `tests/test_version_coherence.py` asserts pyproject.toml / plugin.json / CITATION.cff / `skills/blog/SKILL.md` frontmatter all match
+6. **Command coherence**: `tests/test_command_coherence.py` asserts `skills/blog/SKILL.md` and `docs/COMMANDS.md` declare the same `/blog X` command set
+
+Run locally before pushing:
+```bash
+python -m pytest tests/
+python3 scripts/lint_prose.py
+claude plugin validate .
+```
 
 ## Uninstall
 

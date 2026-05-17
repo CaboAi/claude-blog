@@ -310,6 +310,7 @@ def test_skill_md_documents_untrusted_data_contract(tmp_path: Path) -> None:
         "nonce",  # v1.8.2 per-load random nonce hardening
         "secrets.token_hex",  # specifies the nonce-generation API
         "load_untrusted_root.py",  # v1.8.3 code-enforced helper reference
+        "OUTERMOST",  # v1.8.4 outer-nonce authority instruction (5TH-AUDIT-006)
     ]
     for phrase in must_have_exact:
         assert phrase in orchestrator, (

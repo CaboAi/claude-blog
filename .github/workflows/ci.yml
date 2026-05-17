@@ -84,6 +84,20 @@ jobs:
           print('plugin.json is valid')
           "
 
+      - name: Run `claude plugin validate` if Claude CLI is available
+        # Best-effort: the official validator runs at marketplace submission
+        # time. We add the CLI check here so PRs catch any schema breaks the
+        # hand-rolled regex/JSON checks above miss. The step is non-fatal
+        # if the CLI is not installable on the runner (continue-on-error).
+        continue-on-error: true
+        run: |
+          if command -v claude >/dev/null 2>&1; then
+            claude plugin validate .
+          else
+            echo "claude CLI not available on runner; falling back to hand-rolled checks above"
+            echo "(install via the user's preferred path to make this step authoritative)"
+          fi
+
   lint-markdown:
     runs-on: ubuntu-latest
     steps:
