@@ -12,7 +12,15 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License: MIT">
   <img src="https://img.shields.io/badge/Python-3.11%2B-blue" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Sub--Skills-30-orange" alt="Sub-Skills">
-  <img src="https://img.shields.io/badge/Tests-160%20passing-brightgreen" alt="Tests: 160 passing">
+  <img src="https://img.shields.io/badge/Tests-187%20passing-brightgreen" alt="Tests: 187 passing">
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/7Q4GaSgUFHo"><img src="https://img.youtube.com/vi/7Q4GaSgUFHo/maxresdefault.jpg" alt="Watch the Claude Blog v1.9.1 walkthrough on YouTube" width="640"></a>
+</p>
+
+<p align="center">
+  <strong><a href="https://youtu.be/7Q4GaSgUFHo">Watch the 12:48 v1.9.1 walkthrough on YouTube</a></strong> · See the 5-gate Blog Delivery Contract run live, including a 6-minute live demo of the <a href="https://claude-blog.md/blog/chatgpt-codex-vs-claude-code-2026">Codex vs Claude sample blog</a> being generated end-to-end.
 </p>
 
 > **Two versions of this skill.** Choose the one that fits how you work:
