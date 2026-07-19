@@ -12,19 +12,30 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Sync fork with upstream
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git remote add upstream ${{ github.event.repository.source.clone_url }}
-          git fetch upstream
+          UPSTREAM_URL=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.clone_url // empty')
+          UPSTREAM_BRANCH=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.default_branch // empty')
 
-          UPSTREAM_BRANCH=$(git symbolic-ref refs/remotes/upstream/HEAD | sed 's@^refs/remotes/upstream/@@')
-          git checkout $UPSTREAM_BRANCH 2>/dev/null || git checkout main 2>/dev/null || git checkout master
-          git merge --no-edit upstream/$UPSTREAM_BRANCH
+          if [ -z "$UPSTREAM_URL" ]; then
+            echo "No parent repository — not a fork. Nothing to sync."
+            exit 0
+          fi
+
+          echo "Upstream: $UPSTREAM_URL ($UPSTREAM_BRANCH)"
+
+          git remote add upstream "$UPSTREAM_URL"
+          git fetch upstream "$UPSTREAM_BRANCH"
+
+          git checkout "$GITHUB_REF_NAME"
+          git merge --no-edit "upstream/$UPSTREAM_BRANCH"
           git push origin HEAD
