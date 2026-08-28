@@ -351,7 +351,7 @@ wheels = [
 
 [[package]]
 name = "claude-blog"
-version = "1.9.0"
+version = "2.2.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -372,7 +372,12 @@ core = [
 ]
 dev = [
     { name = "beautifulsoup4" },
+    { name = "detect-secrets" },
+    { name = "google-api-python-client" },
+    { name = "markdown" },
+    { name = "pillow" },
     { name = "pytest" },
+    { name = "requests" },
     { name = "textstat" },
 ]
 google = [
@@ -387,6 +392,7 @@ presentation = [
     { name = "google-genai" },
     { name = "markdown" },
     { name = "patchright" },
+    { name = "pillow" },
     { name = "requests" },
     { name = "weasyprint" },
 ]
@@ -395,23 +401,29 @@ presentation = [
 requires-dist = [
     { name = "beautifulsoup4", marker = "extra == 'core'", specifier = ">=4.12.0,<5.0.0" },
     { name = "beautifulsoup4", marker = "extra == 'dev'", specifier = ">=4.12.0,<5.0.0" },
-    { name = "google-ads", marker = "extra == 'ads'", specifier = ">=22.0.0,<26.0.0" },
+    { name = "detect-secrets", marker = "extra == 'dev'", specifier = ">=1.5.0,<2.0.0" },
+    { name = "google-ads", marker = "extra == 'ads'", specifier = ">=31.2.0,<32.0.0" },
     { name = "google-analytics-data", marker = "extra == 'google'", specifier = ">=0.18.0,<1.0.0" },
+    { name = "google-api-python-client", marker = "extra == 'dev'", specifier = ">=2.100.0,<3.0.0" },
     { name = "google-api-python-client", marker = "extra == 'google'", specifier = ">=2.100.0,<3.0.0" },
     { name = "google-auth", marker = "extra == 'google'", specifier = ">=2.20.0,<3.0.0" },
     { name = "google-auth-httplib2", marker = "extra == 'google'", specifier = ">=0.2.0,<1.0.0" },
-    { name = "google-auth-oauthlib", marker = "extra == 'google'", specifier = ">=1.0.0,<2.0.0" },
-    { name = "google-genai", marker = "extra == 'presentation'", specifier = ">=1.0.0,<2.0.0" },
+    { name = "google-auth-oauthlib", marker = "extra == 'google'", specifier = ">=1.3.1,<2.0.0" },
+    { name = "google-genai", marker = "extra == 'presentation'", specifier = ">=2.14.0,<3.0.0" },
     { name = "jsonschema", marker = "extra == 'advanced'", specifier = ">=4.20.0,<5.0.0" },
-    { name = "language-tool-python", marker = "extra == 'advanced'", specifier = ">=2.7.1,<3.0.0" },
+    { name = "language-tool-python", marker = "extra == 'advanced'", specifier = ">=2.7.1,<4.0.0" },
     { name = "lxml", marker = "extra == 'advanced'", specifier = ">=5.0.0,<7.0.0" },
+    { name = "markdown", marker = "extra == 'dev'", specifier = ">=3.5,<4.0" },
     { name = "markdown", marker = "extra == 'presentation'", specifier = ">=3.5,<4.0" },
-    { name = "patchright", marker = "extra == 'presentation'", specifier = ">=1.40,<2.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<9.0" },
+    { name = "patchright", marker = "extra == 'presentation'", specifier = "==1.61.2" },
+    { name = "pillow", marker = "extra == 'dev'", specifier = ">=11.3.0,<13.0.0" },
+    { name = "pillow", marker = "extra == 'presentation'", specifier = ">=11.3.0,<13.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0,<10.0" },
+    { name = "requests", marker = "extra == 'dev'", specifier = ">=2.32.4,<3.0.0" },
     { name = "requests", marker = "extra == 'google'", specifier = ">=2.32.4,<3.0.0" },
     { name = "requests", marker = "extra == 'presentation'", specifier = ">=2.32.4,<3.0.0" },
     { name = "scikit-learn", marker = "extra == 'advanced'", specifier = ">=1.4.0,<2.0.0" },
-    { name = "sentence-transformers", marker = "extra == 'advanced'", specifier = ">=4.0.0,<5.0.0" },
+    { name = "sentence-transformers", marker = "extra == 'advanced'", specifier = ">=4.0.0,<6.0.0" },
     { name = "spacy", marker = "extra == 'advanced'", specifier = ">=3.7.0,<4.0.0" },
     { name = "textstat", marker = "extra == 'core'", specifier = ">=0.7.3,<1.0.0" },
     { name = "textstat", marker = "extra == 'dev'", specifier = ">=0.7.3,<1.0.0" },
@@ -568,34 +580,34 @@ wheels = [
 
 [package.optional-dependencies]
 cudart = [
-    { name = "nvidia-cuda-runtime", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-runtime" },
 ]
 cufft = [
-    { name = "nvidia-cufft", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cufft" },
 ]
 cufile = [
-    { name = "nvidia-cufile", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cufile" },
 ]
 cupti = [
-    { name = "nvidia-cuda-cupti", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-cupti" },
 ]
 curand = [
-    { name = "nvidia-curand", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-curand" },
 ]
 cusolver = [
-    { name = "nvidia-cusolver", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cusolver" },
 ]
 cusparse = [
-    { name = "nvidia-cusparse", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cusparse" },
 ]
 nvjitlink = [
-    { name = "nvidia-nvjitlink", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-nvjitlink" },
 ]
 nvrtc = [
-    { name = "nvidia-cuda-nvrtc", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-cuda-nvrtc" },
 ]
 nvtx = [
-    { name = "nvidia-nvtx", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "nvidia-nvtx" },
 ]
 
 [[package]]
@@ -652,6 +664,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/01/ffe51729a8f961a437920560659073e47f575d4627445216c1177ecd4a41/cymem-2.0.13-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:666ce6146bc61b9318aa70d91ce33f126b6344a25cf0b925621baed0c161e9cc", size = 290465, upload-time = "2025-11-14T14:58:21.815Z" },
     { url = "https://files.pythonhosted.org/packages/fd/ac/c9e7d68607f71ef978c81e334ab2898b426944c71950212b1467186f69f9/cymem-2.0.13-cp314-cp314t-win_amd64.whl", hash = "sha256:84c1168c563d9d1e04546cb65e3e54fde2bf814f7c7faf11fc06436598e386d1", size = 46665, upload-time = "2025-11-14T14:58:23.512Z" },
     { url = "https://files.pythonhosted.org/packages/66/66/150e406a2db5535533aa3c946de58f0371f2e412e23f050c704588023e6e/cymem-2.0.13-cp314-cp314t-win_arm64.whl", hash = "sha256:e9027764dc5f1999fb4b4cabee1d0322c59e330c0a6485b436a68275f614277f", size = 39715, upload-time = "2025-11-14T14:58:24.773Z" },
+]
+
+[[package]]
+name = "detect-secrets"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyyaml" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/69/67/382a863fff94eae5a0cf05542179169a1c49a4c8784a9480621e2066ca7d/detect_secrets-1.5.0.tar.gz", hash = "sha256:6bb46dcc553c10df51475641bb30fd69d25645cc12339e46c824c1e0c388898a", size = 97351, upload-time = "2024-05-06T17:46:19.721Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/5e/4f5fe4b89fde1dc3ed0eb51bd4ce4c0bca406246673d370ea2ad0c58d747/detect_secrets-1.5.0-py3-none-any.whl", hash = "sha256:e24e7b9b5a35048c313e983f76c4bd09dad89f045ff059e354f9943bf45aa060", size = 120341, upload-time = "2024-05-06T17:46:16.628Z" },
 ]
 
 [[package]]
@@ -739,21 +764,23 @@ wheels = [
 
 [[package]]
 name = "google-ads"
-version = "25.2.0"
+version = "31.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "google-api-core" },
     { name = "google-auth-oauthlib" },
     { name = "googleapis-common-protos" },
     { name = "grpcio" },
-    { name = "grpcio-status" },
+    { name = "grpcio-status", version = "1.71.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "grpcio-status", version = "1.80.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "proto-plus" },
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/59/08/6fc36387dac22f0787776083d0af588ccc079c1183c3ec79e00ed841950c/google_ads-25.2.0.tar.gz", hash = "sha256:ddcd1f910d96bc6200b93b3ee9cbef1e4ea37806128c48e9453df34a222999ce", size = 5178262, upload-time = "2025-02-28T01:46:44.298Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/68/2e/c90d8aed68a711b99f0d1aa1e6ed87741a28da73e8f1cb85d6e15faea593/google_ads-31.4.0.tar.gz", hash = "sha256:038e502608afc1e88888e2e4ae367bc7a7878b5c3206910753c6a089f0b463cc", size = 12455947, upload-time = "2026-08-19T14:12:53.79Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/fa/e9/94cb12947afae5f8e3707abed073baa64197986627de6a92c94a00e6ec42/google_ads-25.2.0-py3-none-any.whl", hash = "sha256:2aa5dde2743736c6ec5ddaa1b092ce6b180b28ddcb0cd3460eebb53b40ce2701", size = 11142601, upload-time = "2025-02-28T01:46:40.83Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/59/27f19973bee9d6ae64e052d20767e2f586067b8237dd935254927f9009b5/google_ads-31.4.0-py3-none-any.whl", hash = "sha256:210a7f6a7b5d40ef544090216dceeb90c9d2e7fba51c72329a690c9e5bb94474", size = 23712034, upload-time = "2026-08-19T14:12:50.698Z" },
 ]
 
 [[package]]
@@ -765,7 +792,8 @@ dependencies = [
     { name = "google-auth" },
     { name = "grpcio" },
     { name = "proto-plus" },
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ba/46/06df55745208b0084264c57e1fbcc6e8ccd542a1a3f20d34c2cde89ba66a/google_analytics_data-0.22.0.tar.gz", hash = "sha256:16fb155d7d9896d34c786c9147f3ae4ab84f67b34dcc21e7199a54f0850286b9", size = 233436, upload-time = "2026-05-07T08:03:43.394Z" }
 wheels = [
@@ -780,7 +808,8 @@ dependencies = [
     { name = "google-auth" },
     { name = "googleapis-common-protos" },
     { name = "proto-plus" },
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
     { name = "requests" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/09/cd/63f1557235c2440fe0577acdbc32577c5c002684c58c7f4d770a92366a24/google_api_core-2.25.2.tar.gz", hash = "sha256:1c63aa6af0d0d5e37966f157a77f9396d820fba59f9e43e9415bc3dc5baff300", size = 166266, upload-time = "2025-10-03T00:07:34.778Z" }
@@ -791,7 +820,8 @@ wheels = [
 [package.optional-dependencies]
 grpc = [
     { name = "grpcio" },
-    { name = "grpcio-status" },
+    { name = "grpcio-status", version = "1.71.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "grpcio-status", version = "1.80.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
 ]
 
 [[package]]
@@ -812,15 +842,15 @@ wheels = [
 
 [[package]]
 name = "google-auth"
-version = "2.53.0"
+version = "2.56.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
     { name = "pyasn1-modules" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/ad/ff781329bbbdc0974a098d996e89c9e1f7024262f9e3eec442fbb9ad1ac6/google_auth-2.53.0.tar.gz", hash = "sha256:e7e6aa16f6bee7b2b264830fd04f08087a1d5a836df516251a5d15327b246c9c", size = 335844, upload-time = "2026-05-15T20:53:07.928Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/33/dbc946a407401b975f0719658f18e664ece2109f79ffd1ff3bf226c205f4/google_auth-2.56.2.tar.gz", hash = "sha256:e28f103ca8091fb7012b99c44243d7366c29863713b8e34a220c3322b7a07051", size = 365820, upload-time = "2026-07-21T21:53:28.188Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4a/c9/db44165ba7c581268c6d46017ef63339110378305062830104fc7fa144cb/google_auth-2.53.0-py3-none-any.whl", hash = "sha256:6e7449917c599b35126a99ec268ec6880301f2fea41dce198fe8fd83ff642b68", size = 246071, upload-time = "2026-05-15T20:53:05.609Z" },
+    { url = "https://files.pythonhosted.org/packages/88/63/50636aae68c9bf17c891c7eb18b49baa9bd6b31d2a97b8de4813a9fc8d1c/google_auth-2.56.2-py3-none-any.whl", hash = "sha256:c8270ea95b2697b74e3d8438ae9c5b898e38b623b915c7b5c5635921e7de68a6", size = 258588, upload-time = "2026-07-21T21:53:26.399Z" },
 ]
 
 [package.optional-dependencies]
@@ -856,7 +886,7 @@ wheels = [
 
 [[package]]
 name = "google-genai"
-version = "1.75.0"
+version = "2.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -870,9 +900,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/59/3ed61240ef20b3ae6ed54e82c6f8b6d1f194947bc6679679dd6cdb037594/google_genai-1.75.0.tar.gz", hash = "sha256:56bac3991b311c93f980c0a2abcd287b672146905df1fbd71c92ed633d5a07cf", size = 539039, upload-time = "2026-05-04T22:48:54.857Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dc/df/4f820054c99f29f2fe3de4a8a7c9534dd795302e4a07483a0cb07c3a29b6/google_genai-2.14.0.tar.gz", hash = "sha256:a9d1f4f362d76280f1be1340fcb3c86e63dbca128f6a4ae09d86ab47ff7148e8", size = 641055, upload-time = "2026-07-22T21:35:44.717Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2d/b6/552d40e96da22921eb1fead7c14b00b5b5473a20e45959488660fab35ee2/google_genai-1.75.0-py3-none-any.whl", hash = "sha256:8dc4c096e7d6288c3087f6893f582fe52468932464781edb8193bd92b9fefb2c", size = 793726, upload-time = "2026-05-04T22:48:53.033Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/86/5ac5fb53e44cca4a6607fb917eb331fa237c65a103b9ec2e8e8acc8a42db/google_genai-2.14.0-py3-none-any.whl", hash = "sha256:ae7172cdd35695189b516b33a878e4132e5daa2dbc03a5b44cddfa8a82fad664", size = 1030738, upload-time = "2026-07-22T21:35:42.785Z" },
 ]
 
 [[package]]
@@ -880,7 +910,8 @@ name = "googleapis-common-protos"
 version = "1.75.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b5/c8/f439cffde755cffa462bfbb156278fa6f9d09119719af9814b858fd4f81f/googleapis_common_protos-1.75.0.tar.gz", hash = "sha256:53a062ff3c32552fbd62c11fe23768b78e4ddf0494d5e5fd97d3f4689c75fbbd", size = 151035, upload-time = "2026-05-07T08:04:49.423Z" }
 wheels = [
@@ -999,14 +1030,35 @@ wheels = [
 name = "grpcio-status"
 version = "1.71.2"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.13.*'",
+    "python_full_version < '3.13'",
+]
 dependencies = [
     { name = "googleapis-common-protos" },
     { name = "grpcio" },
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" } },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fd/d1/b6e9877fedae3add1afdeae1f89d1927d296da9cf977eca0eb08fb8a460e/grpcio_status-1.71.2.tar.gz", hash = "sha256:c7a97e176df71cdc2c179cd1847d7fc86cca5832ad12e9798d7fed6b7a1aab50", size = 13677, upload-time = "2025-06-28T04:24:05.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/67/58/317b0134129b556a93a3b0afe00ee675b5657f0155509e22fcb853bafe2d/grpcio_status-1.71.2-py3-none-any.whl", hash = "sha256:803c98cb6a8b7dc6dbb785b1111aed739f241ab5e9da0bba96888aa74704cfd3", size = 14424, upload-time = "2025-06-28T04:23:42.136Z" },
+]
+
+[[package]]
+name = "grpcio-status"
+version = "1.80.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14'",
+]
+dependencies = [
+    { name = "googleapis-common-protos" },
+    { name = "grpcio" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" } },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b1/ed/105f619bdd00cb47a49aa2feea6232ea2bbb04199d52a22cc6a7d603b5cb/grpcio_status-1.80.0.tar.gz", hash = "sha256:df73802a4c89a3ea88aa2aff971e886fccce162bc2e6511408b3d67a144381cd", size = 13901, upload-time = "2026-03-30T08:54:34.784Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/80/58cd2dfc19a07d022abe44bde7c365627f6c7cb6f692ada6c65ca437d09a/grpcio_status-1.80.0-py3-none-any.whl", hash = "sha256:4b56990363af50dbf2c2ebb80f1967185c07d87aa25aa2bea45ddb75fc181dbe", size = 14638, upload-time = "2026-03-30T08:54:01.569Z" },
 ]
 
 [[package]]
@@ -1736,21 +1788,21 @@ wheels = [
 
 [[package]]
 name = "patchright"
-version = "1.59.1"
+version = "1.61.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "greenlet" },
     { name = "pyee" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/1d/e6a4b7ff95c35617495a9b686cbf78a968f26ad51c91cef6b2a5eee88f3e/patchright-1.59.1-py3-none-macosx_10_13_x86_64.whl", hash = "sha256:de2e0ea51a270e77ef6588bea1370510695cb94fe6ef848bc7e587d3458764ea", size = 43143713, upload-time = "2026-04-29T08:02:46.651Z" },
-    { url = "https://files.pythonhosted.org/packages/de/55/0b4bb56c141f2906e212c5b31f21ba6107a98105240c173b54d72c74f480/patchright-1.59.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e93fe960714c39152ea3300b7a2c3882cb8d1f992f6120db53406b5590fa4208", size = 41933976, upload-time = "2026-04-29T08:02:51.531Z" },
-    { url = "https://files.pythonhosted.org/packages/72/fc/98ad4f09613051b8c673701043ba6744a213175b01399e555b73de742006/patchright-1.59.1-py3-none-macosx_11_0_universal2.whl", hash = "sha256:bfaad3600817f271ccab34db9f33bb8148c649a157bad28b727097d0b45b8c5d", size = 43143717, upload-time = "2026-04-29T08:02:55.619Z" },
-    { url = "https://files.pythonhosted.org/packages/3b/cc/f62063e59db98b154d9faf79603164d548f5117c95acc9d2a8104df9607a/patchright-1.59.1-py3-none-manylinux1_x86_64.whl", hash = "sha256:f0a7ee31e56391a96cd81f9ac1db130e8166c6083b7f3fb3bc9ba19d80d68127", size = 47138586, upload-time = "2026-04-29T08:03:00.04Z" },
-    { url = "https://files.pythonhosted.org/packages/ac/74/2965635dd1d461243281e1774f78d865c2d1df24808cbe3b27a5ede64d7e/patchright-1.59.1-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:69165d20308a045ddf1ad512467625248c5763ea9ee36ee57b0003d1ff8b9b12", size = 46864405, upload-time = "2026-04-29T08:03:04.825Z" },
-    { url = "https://files.pythonhosted.org/packages/e8/c2/959acc3fd3d867af4e567bb5e0cc63d4b1ca17fe4b7f673b3eef52fbf287/patchright-1.59.1-py3-none-win32.whl", hash = "sha256:56d9f2f3325f7205dfe6d22abc0969378225cd58b6ce29e7a7e3526c1d78c160", size = 37700491, upload-time = "2026-04-29T08:03:09.81Z" },
-    { url = "https://files.pythonhosted.org/packages/19/b1/1e7a4844ed6bc6bd3653c6e708f614a2b27ac54875ebd0e9c7badf7d25b6/patchright-1.59.1-py3-none-win_amd64.whl", hash = "sha256:3af6515b6103aedd1cdd09be7fa08ac028a954c6687d73fdee92570ae580fe4c", size = 37700495, upload-time = "2026-04-29T08:03:13.727Z" },
-    { url = "https://files.pythonhosted.org/packages/10/95/b148a41c6a099cd3d9f11a0641e4f10d50141cb8dca052f75f64dc631634/patchright-1.59.1-py3-none-win_arm64.whl", hash = "sha256:e259fae74b59a89ee020703ba142b8b5dd81a08f1c95ee3cda92829026057092", size = 33943539, upload-time = "2026-04-29T08:03:17.355Z" },
+    { url = "https://files.pythonhosted.org/packages/79/42/a76e2ea17dd4feccbf5ef6df017fb2e67f4b72a6f559f59d9aad1197f83a/patchright-1.61.2-py3-none-macosx_10_13_x86_64.whl", hash = "sha256:43ae10cd2a3e46b222179a120ab39ba88f801f3a42aa41cab45fac9928f2103d", size = 43727572, upload-time = "2026-07-05T21:17:52.382Z" },
+    { url = "https://files.pythonhosted.org/packages/57/e7/1ff89853c9aeaf26cd20559f401375ec71a40e4041cf7ace03d41a741f06/patchright-1.61.2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:a3da24d7890631255c7bef467b94ffe7f7bfa36f96fc72c10d5787d3cb396873", size = 42512921, upload-time = "2026-07-05T21:17:55.657Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/d0/d730536a7fc43c3aaf2781518595ca71ffa1fc2f24e580c0d0cf04e00eca/patchright-1.61.2-py3-none-macosx_11_0_universal2.whl", hash = "sha256:edef852aa7d28791fa2d3f7ce135edfea2ce07a2bc5e0a74fb2dfe269af62223", size = 43727573, upload-time = "2026-07-05T21:17:59.121Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/b5/c76dcda275cb0d9651321e343f3268609ae24cef196bff56751754ffba16/patchright-1.61.2-py3-none-manylinux1_x86_64.whl", hash = "sha256:545bdf2c0bb5f9ad78ab315e91c8c2990cc6a702e7f18650b71fe1071049b5c1", size = 47729338, upload-time = "2026-07-05T21:18:02.608Z" },
+    { url = "https://files.pythonhosted.org/packages/19/ef/5de6feaedf47a6ba8efb9e8c4f8a42bad29cc59c35bbd088b1729a36b271/patchright-1.61.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1824da30cf6560749bc1bb4a7f002fec325d5b709090dd7c8c1b643899331cee", size = 47426969, upload-time = "2026-07-05T21:18:06.88Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/6e/ce2c5d03a4c785ac8f3e0180bbf83ef85149cf41fdfa41c09bd8cbcfd945/patchright-1.61.2-py3-none-win32.whl", hash = "sha256:a5aaf4cec2bd38714f2447f84bcdfe7dcb592a16e9616bf6d2d872066d1c78af", size = 38155048, upload-time = "2026-07-05T21:18:09.938Z" },
+    { url = "https://files.pythonhosted.org/packages/46/c8/fceb57b9d32ed078f53fc6a757c6e4b54cb117f59412938252a3359105e5/patchright-1.61.2-py3-none-win_amd64.whl", hash = "sha256:506bca9b72e609fd8fee35e2a3ad26e5d92e25337002f5c2cdad53d5cacb0b67", size = 38155052, upload-time = "2026-07-05T21:18:13.051Z" },
+    { url = "https://files.pythonhosted.org/packages/33/96/67a791c6b7cd76424b44d356beaf414ab97c3aef2d42fad4641e7905b41d/patchright-1.61.2-py3-none-win_arm64.whl", hash = "sha256:3dee1e2daada9f98653763831f688d39c924e0cf0eeb988e8047b703766cee73", size = 34268624, upload-time = "2026-07-05T21:18:15.966Z" },
 ]
 
 [[package]]
@@ -1906,7 +1958,8 @@ name = "proto-plus"
 version = "1.28.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "protobuf" },
+    { name = "protobuf", version = "5.29.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "protobuf", version = "6.33.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c9/56/e647b0c675392d2da368da7b6f158f7368b18542fd6f7d7400a2f39de000/proto_plus-1.28.0.tar.gz", hash = "sha256:38e5696342835b08fc116f30a25665b29531cda9d5d5643e9b81fc312385abd9", size = 57221, upload-time = "2026-05-07T08:04:50.811Z" }
 wheels = [
@@ -1917,6 +1970,10 @@ wheels = [
 name = "protobuf"
 version = "5.29.6"
 source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.13.*'",
+    "python_full_version < '3.13'",
+]
 sdist = { url = "https://files.pythonhosted.org/packages/7e/57/394a763c103e0edf87f0938dafcd918d53b4c011dfc5c8ae80f3b0452dbb/protobuf-5.29.6.tar.gz", hash = "sha256:da9ee6a5424b6b30fd5e45c5ea663aef540ca95f9ad99d1e887e819cdf9b8723", size = 425623, upload-time = "2026-02-04T22:54:40.584Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d4/88/9ee58ff7863c479d6f8346686d4636dd4c415b0cbeed7a6a7d0617639c2a/protobuf-5.29.6-cp310-abi3-win32.whl", hash = "sha256:62e8a3114992c7c647bce37dcc93647575fc52d50e48de30c6fcb28a6a291eb1", size = 423357, upload-time = "2026-02-04T22:54:25.805Z" },
@@ -1925,6 +1982,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/d7/48cbf6b0c3c39761e47a99cb483405f0fde2be22cf00d71ef316ce52b458/protobuf-5.29.6-cp38-abi3-manylinux2014_aarch64.whl", hash = "sha256:a8866b2cff111f0f863c1b3b9e7572dc7eaea23a7fae27f6fc613304046483e6", size = 320284, upload-time = "2026-02-04T22:54:31.782Z" },
     { url = "https://files.pythonhosted.org/packages/e3/dd/cadd6ec43069247d91f6345fa7a0d2858bef6af366dbd7ba8f05d2c77d3b/protobuf-5.29.6-cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:e3387f44798ac1106af0233c04fb8abf543772ff241169946f698b3a9a3d3ab9", size = 320478, upload-time = "2026-02-04T22:54:32.909Z" },
     { url = "https://files.pythonhosted.org/packages/5a/cb/e3065b447186cb70aa65acc70c86baf482d82bf75625bf5a2c4f6919c6a3/protobuf-5.29.6-py3-none-any.whl", hash = "sha256:6b9edb641441b2da9fa8f428760fc136a49cf97a52076010cf22a2ff73438a86", size = 173126, upload-time = "2026-02-04T22:54:39.462Z" },
+]
+
+[[package]]
+name = "protobuf"
+version = "6.33.6"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.14'",
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/70/e908e9c5e52ef7c3a6c7902c9dfbb34c7e29c25d2f81ade3856445fd5c94/protobuf-6.33.6.tar.gz", hash = "sha256:a6768d25248312c297558af96a9f9c929e8c4cee0659cb07e780731095f38135", size = 444531, upload-time = "2026-03-18T19:05:00.988Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/9f/2f509339e89cfa6f6a4c4ff50438db9ca488dec341f7e454adad60150b00/protobuf-6.33.6-cp310-abi3-win32.whl", hash = "sha256:7d29d9b65f8afef196f8334e80d6bc1d5d4adedb449971fefd3723824e6e77d3", size = 425739, upload-time = "2026-03-18T19:04:48.373Z" },
+    { url = "https://files.pythonhosted.org/packages/76/5d/683efcd4798e0030c1bab27374fd13a89f7c2515fb1f3123efdfaa5eab57/protobuf-6.33.6-cp310-abi3-win_amd64.whl", hash = "sha256:0cd27b587afca21b7cfa59a74dcbd48a50f0a6400cfb59391340ad729d91d326", size = 437089, upload-time = "2026-03-18T19:04:50.381Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/01/a3c3ed5cd186f39e7880f8303cc51385a198a81469d53d0fdecf1f64d929/protobuf-6.33.6-cp39-abi3-macosx_10_9_universal2.whl", hash = "sha256:9720e6961b251bde64edfdab7d500725a2af5280f3f4c87e57c0208376aa8c3a", size = 427737, upload-time = "2026-03-18T19:04:51.866Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/90/b3c01fdec7d2f627b3a6884243ba328c1217ed2d978def5c12dc50d328a3/protobuf-6.33.6-cp39-abi3-manylinux2014_aarch64.whl", hash = "sha256:e2afbae9b8e1825e3529f88d514754e094278bb95eadc0e199751cdd9a2e82a2", size = 324610, upload-time = "2026-03-18T19:04:53.096Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/ca/25afc144934014700c52e05103c2421997482d561f3101ff352e1292fb81/protobuf-6.33.6-cp39-abi3-manylinux2014_s390x.whl", hash = "sha256:c96c37eec15086b79762ed265d59ab204dabc53056e3443e702d2681f4b39ce3", size = 339381, upload-time = "2026-03-18T19:04:54.616Z" },
+    { url = "https://files.pythonhosted.org/packages/16/92/d1e32e3e0d894fe00b15ce28ad4944ab692713f2e7f0a99787405e43533a/protobuf-6.33.6-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:e9db7e292e0ab79dd108d7f1a94fe31601ce1ee3f7b79e0692043423020b0593", size = 323436, upload-time = "2026-03-18T19:04:55.768Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/72/02445137af02769918a93807b2b7890047c32bfb9f90371cbc12688819eb/protobuf-6.33.6-py3-none-any.whl", hash = "sha256:77179e006c476e69bf8e8ce866640091ec42e1beb80b213c3900006ecfba6901", size = 170656, upload-time = "2026-03-18T19:04:59.826Z" },
 ]
 
 [[package]]
