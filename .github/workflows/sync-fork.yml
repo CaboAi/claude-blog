@@ -12,30 +12,27 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
       - name: Sync fork with upstream
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          PARENT=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.full_name // empty')
+          BRANCH=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.default_branch')
 
-          UPSTREAM_URL=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.clone_url // empty')
-          UPSTREAM_BRANCH=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.default_branch // empty')
-
-          if [ -z "$UPSTREAM_URL" ]; then
-            echo "No parent repository — not a fork. Nothing to sync."
+          if [ -z "$PARENT" ]; then
+            echo "Not a fork — nothing to sync."
             exit 0
           fi
 
-          echo "Upstream: $UPSTREAM_URL ($UPSTREAM_BRANCH)"
+          echo "Syncing $GITHUB_REPOSITORY@$BRANCH from upstream $PARENT"
 
-          git remote add upstream "$UPSTREAM_URL"
-          git fetch upstream "$UPSTREAM_BRANCH"
-
-          git checkout "$GITHUB_REF_NAME"
-          git merge --no-edit "upstream/$UPSTREAM_BRANCH"
-          git push origin HEAD
+          # Server-side sync. GITHUB_TOKEN cannot update .github/workflows/*
+          # files, so this returns 422 whenever upstream changed a workflow
+          # file; that is reported as a warning, not a job failure.
+          if OUT=$(gh api --method POST "repos/$GITHUB_REPOSITORY/merge-upstream" \
+                     -f branch="$BRANCH" 2>&1); then
+            echo "$OUT"
+          else
+            echo "$OUT"
+            echo "::warning::Upstream sync skipped — branch diverged or conflicts with upstream. Resolve manually."
+          fi
